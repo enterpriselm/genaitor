@@ -1,6 +1,7 @@
 # llamafile
 llava-v1.5-7b-q4.llamafile
 llama.log
+genaitor.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
