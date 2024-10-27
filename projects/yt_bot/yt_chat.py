@@ -21,7 +21,7 @@ Help the user with the following request:
 """
 
 def get_api_keys_from_db():
-    conn = sqlite3.connect('genaitor.db')
+    conn = sqlite3.connect('youtube_chat.db')
     cursor = conn.cursor()
     cursor.execute("SELECT api_key FROM api_keys")
     api_keys = [row[0] for row in cursor.fetchall()]
@@ -77,7 +77,7 @@ def require_api_key():
 
 
 @app.route('/youtube', methods=['POST'])
-def generate_agent():
+def get_answer():
     data = request.json
     youtube_url = data.get('youtube_url')
     user_query = data.get('user_query')
