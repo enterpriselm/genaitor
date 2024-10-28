@@ -11,11 +11,14 @@ def init_db():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS api_keys (
-            username TEXT PRIMARY KEY,
-            api_key TEXT NOT NULL
-        )
-    ''')
+            CREATE TABLE IF NOT EXISTS api_keys (
+                username TEXT PRIMARY KEY,
+                api_key TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                permissions TEXT,
+                UNIQUE(username)
+            )
+        ''')
     conn.commit()
     conn.close()
 
@@ -28,10 +31,12 @@ def save_api_key(username, api_key):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO api_keys (username, api_key)
-        VALUES (?, ?)
-        ON CONFLICT(username) DO UPDATE SET api_key=excluded.api_key
-    ''', (username, api_key))
+            INSERT INTO api_keys (username, api_key)
+            VALUES (?, ?)
+            ON CONFLICT(username) DO UPDATE SET 
+                api_key = excluded.api_key,
+                created_at = CURRENT_TIMESTAMP
+        ''', (username, api_key))    
     conn.commit()
     conn.close()
 

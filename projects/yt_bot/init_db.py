@@ -10,7 +10,7 @@ def initialize_db():
             username TEXT NOT NULL,
             api_key TEXT NOT NULL UNIQUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            permissions TEXT
+            permissions TEXT)
         ''')
     
     cursor.execute("INSERT OR IGNORE INTO api_keys (username, api_key) VALUES (?, ?)", 
