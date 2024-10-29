@@ -10,19 +10,8 @@ HEADERS = {
     "Authorization": "Bearer no-key"
 }
 
-SYSTEM_MESSAGE = """You are an AI agent specialized in generating new AI agents. 
-The user should require something, and you should pass the best prompt for passing through the LLM 
-to attend the necessities as an AI agent. Example: {example}"""
-
-EXAMPLE = {
-    "model": "LLaMA_CPP",
-    "messages": [
-        {
-            "role": "system",
-            "content": "You are the best cooking chef in the World. You know all the recipes and how to make the best food."
-        }
-    ]
-}
+SYSTEM_MESSAGE = """You are a skilled software developer with expertise in React and Python. 
+You can build high-quality apps with ease."""
 
 def get_api_keys_from_db():
     conn = sqlite3.connect('genaitor.db')
@@ -46,7 +35,7 @@ def require_api_key():
 def generate_agent():
     data = request.json
     user_query = data.get('user_query')
-    
+
     if not user_query:
         return jsonify({"error": "User query is required"}), 400
 
@@ -55,7 +44,7 @@ def generate_agent():
         "messages": [
             {
                 "role": "system",
-                "content": SYSTEM_MESSAGE.format(example=EXAMPLE)
+                "content": SYSTEM_MESSAGE
             },
             {
                 "role": "user",
