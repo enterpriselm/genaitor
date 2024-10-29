@@ -13,23 +13,6 @@ HEADERS = {
 SYSTEM_MESSAGE = """You are a skilled software developer with expertise in React and Python. 
 You can build high-quality apps with ease."""
 
-def get_api_keys_from_db():
-    conn = sqlite3.connect('genaitor.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT api_key FROM api_keys")
-    api_keys = [row[0] for row in cursor.fetchall()]
-    conn.close()
-    return api_keys
-
-@app.before_request
-def require_api_key():
-    api_key = request.headers.get('X-API-Key')
-    if not api_key:
-        return jsonify({"error": "API Key is required"}), 401
-
-    api_keys = get_api_keys_from_db()
-    if api_key not in api_keys:
-        return jsonify({"error": "Unauthorized - Invalid API Key"}), 401
 
 @app.route('/generate-agent', methods=['POST'])
 def generate_agent():
