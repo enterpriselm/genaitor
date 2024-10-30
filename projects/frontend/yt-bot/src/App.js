@@ -5,33 +5,37 @@ import './App.css';
 function App() {
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [userQuery, setUserQuery] = useState('');
-  const [videoFile, setVideoFile] = useState(null);
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setResponse(''); // Limpa a resposta anterior antes de uma nova chamada
 
-    const formData = new FormData();
-    formData.append('user_query', userQuery);
-    if (youtubeUrl) formData.append('youtube_url', youtubeUrl);
-    if (videoFile) formData.append('video_file', videoFile);
-    
-    console.log(formData)
     try {
-      const result = await axios.post('http://localhost:5000/youtube', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          // 'X-API-Key': 'your-api-key-here',
-        },
-      });
-      setResponse(result.data);
+      const result = await axios.post(
+        'http://localhost:5000/youtube',
+        { youtube_url: youtubeUrl, user_query: userQuery }, // Payload em JSON
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            // 'X-API-Key': 'your-api-key-here', // Descomente se necessário
+          },
+        }
+      );
+
+      if (result.data && result.data.answer) {
+        setResponse(result.data.answer);
+      } else {
+        setResponse('No answer received from the API.');
+      }
     } catch (error) {
       console.error(error);
       setResponse('Error processing request. Check console for details.');
+    } finally {
+      setLoading(false); // Move o setLoading para o bloco finally para garantir que seja chamado em caso de erro
     }
-    setLoading(false);
   };
 
   return (
@@ -44,14 +48,6 @@ function App() {
             value={youtubeUrl}
             onChange={(e) => setYoutubeUrl(e.target.value)}
             placeholder="Enter YouTube URL"
-          />
-        </label>
-        
-        <label> Upload Video File (.mp4/.mp3):
-          <input
-            type="file"
-            accept=".mp4, .mp3"
-            onChange={(e) => setVideoFile(e.target.files[0])}
           />
         </label>
         

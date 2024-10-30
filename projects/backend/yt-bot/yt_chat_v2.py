@@ -7,32 +7,18 @@ import speech_recognition as sr
 from pydub import AudioSegment
 from moviepy.editor import VideoFileClip
 import os
-from flask_cors import CORS
+from gpt4all import GPT4All
 
 app = Flask(__name__)
-CORS(app)
 
-LLAMA_API_URL = 'http://localhost:8080/v1/chat/completions'
-HEADERS = {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer no-key"
-}
+model = GPT4All("Meta-Llama-3-8B-Instruct.Q4_0.gguf")
 
 prompt_template = """
 You are a helpful assistant that explains YT videos. Given the following video transcript:
 {video_transcript}
-and the following history of chat:
-{history}
 Help the user with the following request:
+{user_query}
 """
-
-def get_api_keys_from_db():
-    conn = sqlite3.connect('youtube_chat.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT api_key FROM api_keys")
-    api_keys = [row[0] for row in cursor.fetchall()]
-    conn.close()
-    return api_keys
 
 def transcribe_audio(file_path):
     recognizer = sr.Recognizer()
@@ -55,23 +41,6 @@ def transcribe_audio(file_path):
     os.remove(audio_path)
     return transcript
 
-def get_payload(video_transcript, user_query):
-    history = str(json.dumps(load_history()))
-    return {
-        "model": "LLaMA_CPP",
-        "messages": [
-            {
-                "role": "system",
-                "content": prompt_template.format(video_transcript=video_transcript, history=history)
-            },
-            {
-                "role": "user",
-                "content": user_query
-            }
-        ],
-        "stream": False 
-    }
-
 def load_history():
     with open('history/chat_history.json', 'r') as f:
         history = json.loads(f.read())
@@ -87,16 +56,6 @@ def save_history(user_query, ai_response):
     with open('history/chat_history.json', 'w') as f:
         f.write(json.dumps(history))
      
-#@app.before_request
-#def require_api_key():
-#    api_key = request.headers.get('X-API-Key')
-#    if not api_key:
-#        return jsonify({"error": "API Key is required"}), 401
-
-#    api_keys = get_api_keys_from_db()
-#    if api_key not in api_keys:
-#        return jsonify({"error": "Unauthorized - Invalid API Key"}), 401
-
 @app.route('/youtube', methods=['POST'])
 def get_answer():
     data = request.json
@@ -121,9 +80,9 @@ def get_answer():
     else:
         return jsonify({"error": "You must provide a YouTube URL or a .mp4/.mp3 file"}), 400
 
-    payload = get_payload(video_transcript, user_query)
-    response = requests.post(LLAMA_API_URL, headers=HEADERS, json=payload)
-    return jsonify({"answer":response.json()['choices'][0]['message']['content']})
+    question = prompt_template.format(video_transcript=video_transcript, user_query=user_query)
+    with model.chat_session():
+        return jsonify({"answer":model.generate(question)}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

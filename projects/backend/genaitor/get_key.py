@@ -15,9 +15,7 @@ def init_db():
                 username TEXT PRIMARY KEY,
                 api_key TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                permissions TEXT,
-                UNIQUE(username)
-            )
+                permissions TEXT)
         ''')
     conn.commit()
     conn.close()
@@ -33,9 +31,6 @@ def save_api_key(username, api_key):
     cursor.execute('''
             INSERT INTO api_keys (username, api_key)
             VALUES (?, ?)
-            ON CONFLICT(username) DO UPDATE SET 
-                api_key = excluded.api_key,
-                created_at = CURRENT_TIMESTAMP
         ''', (username, api_key))    
     conn.commit()
     conn.close()
