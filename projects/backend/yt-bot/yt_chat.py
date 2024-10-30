@@ -85,22 +85,22 @@ def save_history(user_query, ai_response):
     with open('history/chat_history.json', 'w') as f:
         f.write(json.dumps(history))
      
-@app.before_request
-def require_api_key():
-    api_key = request.headers.get('X-API-Key')
-    if not api_key:
-        return jsonify({"error": "API Key is required"}), 401
+#@app.before_request
+#def require_api_key():
+#    api_key = request.headers.get('X-API-Key')
+#    if not api_key:
+#        return jsonify({"error": "API Key is required"}), 401
 
-    api_keys = get_api_keys_from_db()
-    if api_key not in api_keys:
-        return jsonify({"error": "Unauthorized - Invalid API Key"}), 401
+#    api_keys = get_api_keys_from_db()
+#    if api_key not in api_keys:
+#        return jsonify({"error": "Unauthorized - Invalid API Key"}), 401
 
 @app.route('/youtube', methods=['POST'])
 def get_answer():
-    data = request.json
+    data = request.form
     youtube_url = data.get('youtube_url')
     user_query = data.get('user_query')
-    video_file = request.files.get('video_file')
+    #video_file = request.files.get('video_file')
     
     if not user_query:
         return jsonify({"error": "User query is required"}), 400
@@ -109,13 +109,13 @@ def get_answer():
         loader = YoutubeLoader.from_youtube_url(youtube_url, add_video_info=False)
         docs = loader.load()
         video_transcript = docs[0].page_content
-    elif video_file and (video_file.filename.endswith('.mp4') or video_file.filename.endswith('.mp3')):
-        file_path = f"temp_upload.{video_file.filename.split('.')[-1]}"
-        video_file.save(file_path)
-        try:
-            video_transcript = transcribe_audio(file_path)
-        finally:
-            os.remove(file_path)
+    #elif video_file and (video_file.filename.endswith('.mp4') or video_file.filename.endswith('.mp3')):
+    #    file_path = f"temp_upload.{video_file.filename.split('.')[-1]}"
+    #    video_file.save(file_path)
+    #    try:
+    #        video_transcript = transcribe_audio(file_path)
+    #    finally:
+    #        os.remove(file_path)
     else:
         return jsonify({"error": "You must provide a YouTube URL or a .mp4/.mp3 file"}), 400
 
