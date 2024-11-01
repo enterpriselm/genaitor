@@ -9,7 +9,7 @@ def generate_agent(prompt):
     payload = {
         "user_query": prompt
     }
-    response = requests.post(url, json=payload, headers=headers)
+    response = requests.post(url, json=payload)#, headers=headers)
     return response.json()['ai_agent_prompt'].replace('</s>','')
 
 def save_agent_structure(prompt, agent_path):
@@ -22,6 +22,14 @@ def save_agent_structure(prompt, agent_path):
         f.write(json.dumps(data))
 
 list_of_agents = [
+    {
+        "name": "answers_crafter",
+        "prompt": "I need an AI Agent that does this: Based on an input to a llm and the output generated, you will validate if the output is correct or not. If is not correct, you will generate a new output"
+    },
+    {
+        "name": "code_reviewer",
+        "prompt": "I need an AI Agent that does this: You will receive a code snippet and must return a review of the code, based on 'python', 'html', 'css', 'javascript' and 'react', suggesting which updates and changes need to be done"
+    },
     {
         "name":"digital_twins_backend",
         "prompt":"I need an AI Agent specialized in digital twins. I'll pass a specific problem and the theory about it. He must returns to me all the python code and structure to simulate this problem as backend"
