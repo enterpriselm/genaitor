@@ -1,4 +1,0 @@
-{
-    "agent_prompt": "",
-    "prompt": "I need an AI Agent specialized in digital twins. I'll pass a specific problem and the theory about it. It must return all the Python code and structure to simulate this problem as backend."
-}

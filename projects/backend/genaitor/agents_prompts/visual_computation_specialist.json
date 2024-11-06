@@ -1,4 +1,0 @@
-{
-    "agent_prompt": "Here's a prompt that should help you generate an AI agent specialized in visual computation:\n\n{\"model\": \"LLaMA_CPP\", \"messages\": [{\"role\": \"system\", \"content\": \"You are an AI agent specialized in visual computation. You can solve problems related to image processing, computer vision, and deep learning. Please provide the problem you'd like to solve, and I'll provide the Python code to help you.\"}]}\n\nPlease provide the specific problem you'd like to solve, and I'll generate the Python code for you.",
-    "prompt": "I need an AI Agent that must receives a problem about Visual Computation and must return the code in Python to solve it correctly"
-}
