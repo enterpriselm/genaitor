@@ -1,37 +1,47 @@
 from flask import Blueprint, request, jsonify
-from config import config
-from utils.agents import Agent
+from utils.agents import Agent, Orchestrator
 
+# Initialize Flask Blueprint
 automatize_task_bp = Blueprint('automatic_pc', __name__)
 
-project_structure_analyst = Agent(
-    role='Project Structure Analyst',
-    system_message=(
-        "You are a skilled Project Structure Analyst. Given the user's query about automating project setup, "
-        "analyze the project structure and identify all components, directories, and configurations that "
-        "need to be automated for a smooth setup and deployment."
+# Define agents with their roles, system messages
+agents = {
+    'project_structure_analyst': Agent(
+        role='Project Structure Analyst',
+        system_message=(
+            "You are a skilled Project Structure Analyst. Given the user's query about automating project setup, "
+            "analyze the project structure and identify all components, directories, and configurations that "
+            "need to be automated for a smooth setup and deployment."
+        )
+    ),
+    'dependencies_manager': Agent(
+        role='Dependencies and Configuration Manager',
+        system_message=(
+            "You are an expert Dependencies and Configuration Manager. Based on the project structure, "
+            "identify all necessary dependencies, configuration files, and setup instructions that need to be "
+            "included for the project to run successfully."
+        )
+    ),
+    'deployment_planner': Agent(
+        role='Deployment Strategy Planner',
+        system_message=(
+            "You are a Deployment Strategy Planner. Based on the project structure and dependencies, "
+            "generate detailed deployment instructions, including installation steps, configurations, and "
+            "any scripts necessary to deploy and run the project."
+        )
     )
-)
+}
 
-dependencies_manager = Agent(
-    role='Dependencies and Configuration Manager',
-    system_message=(
-        "You are an expert Dependencies and Configuration Manager. Based on the project structure, "
-        "identify all necessary dependencies, configuration files, and setup instructions that need to be "
-        "included for the project to run successfully."
-    )
-)
+# Define the task flow for the project automation pipeline
+tasks = [
+    {"description": "Analyze project structure", "agent": agents['project_structure_analyst']},
+    {"description": "Manage dependencies and configurations", "agent": agents['dependencies_manager']},
+    {"description": "Plan deployment strategy", "agent": agents['deployment_planner']}
+]
 
-deployment_planner = Agent(
-    role='Deployment Strategy Planner',
-    system_message=(
-        "You are a Deployment Strategy Planner. Based on the project structure and dependencies, "
-        "generate detailed deployment instructions, including installation steps, configurations, and "
-        "any scripts necessary to deploy and run the project."
-    )
-)
+# Initialize the Orchestrator with agents, tasks, and process
+automation_orchestrator = Orchestrator(agents=agents, tasks=tasks, process='sequential', cumulative=False)
 
-# Define the main route that processes the user's query
 @automatize_task_bp.route('/automatic-pc', methods=['POST'])
 def automatize_task():
     data = request.get_json()
@@ -41,24 +51,15 @@ def automatize_task():
     if not user_query:
         return jsonify({"error": "User query is required"}), 400
 
-    # Pipeline process
-    structure_output = project_structure_analyst.perform_task(user_query)
-    if "error" in structure_output:
-        return jsonify({"error": "Project structure analysis failed.", "details": structure_output}), 500
+    # Initiate the Orchestrator to handle the project automation workflow
+    result = automation_orchestrator.kickoff(user_query)
 
-    dependencies_output = dependencies_manager.perform_task(structure_output)
-    if "error" in dependencies_output:
-        return jsonify({"error": "Dependencies and configuration management failed.", "details": dependencies_output}), 500
+    if "error" in result:
+        return jsonify(result), 500
 
-    deployment_output = deployment_planner.perform_task(dependencies_output)
-    if "error" in deployment_output:
-        return jsonify({"error": "Deployment strategy planning failed.", "details": deployment_output}), 500
+    # Extract outputs for each step in the process
+    response_data = {task['description']: res for task, res in zip(tasks, result["output"])}
 
-    # Format the final response with each step's output
-    response_data = {
-        "project_structure_analysis": structure_output,
-        "dependencies_and_configurations": dependencies_output,
-        "deployment_instructions": deployment_output
-    }
-
-    return jsonify({"ai_agent_prompt": response_data})
+    return jsonify({
+        "ai_agent_prompt": response_data
+    }), 200

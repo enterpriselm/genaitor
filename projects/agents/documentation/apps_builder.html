@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Genaitor API Documentation - Apps Builder</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .section-header {
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="my-4">Apps Builder Route</h1>
+        
+        <section id="overview">
+            <h2 class="section-header">Overview</h2>
+            <p>This API endpoint, <strong>/apps-builder</strong>, takes a user query, analyzes app requirements, designs architecture, and plans both frontend and backend components. It uses a pipeline of agents for a structured workflow:</p>
+            <ul>
+                <li><strong>Requirement Analyst:</strong> Analyzes the core app requirements and desired features.</li>
+                <li><strong>System Architect:</strong> Designs the system architecture based on requirements.</li>
+                <li><strong>Frontend Developer:</strong> Plans the frontend structure using React.</li>
+                <li><strong>Backend Developer:</strong> Plans the backend structure using Python.</li>
+            </ul>
+        </section>
+        
+        <section id="endpoint">
+            <h2 class="section-header">API Endpoint</h2>
+            <h3>POST /apps-builder</h3>
+            <p>This endpoint processes a user query through a sequence of tasks managed by the app-building agents.</p>
+            
+            <div class="code-block">
+                <strong>Request Body:</strong>
+                <pre>{
+    "user_query": "I need an e-commerce app for digital products."
+}</pre>
+                <strong>Response:</strong>
+                <pre>{
+    "ai_agent_prompt": {
+        "Analyze requirements": "Identified app as an e-commerce platform for digital products.",
+        "Design system architecture": "Proposed microservices architecture with payment, product, and user management.",
+        "Plan frontend in React": "Designed main user interface components and navigation flow in React.",
+        "Plan backend in Python": "Outlined APIs and database schema for user, product, and transaction management."
+    }
+}</pre>
+            </div>
+            
+            <p><strong>Response Codes:</strong></p>
+            <ul>
+                <li><strong>200 OK:</strong> Successfully processed the query and returned the results.</li>
+                <li><strong>400 Bad Request:</strong> Missing 'user_query' in the request body.</li>
+                <li><strong>500 Internal Server Error:</strong> An error occurred during pipeline processing.</li>
+            </ul>
+        </section>
+
+        <section id="agents">
+            <h2 class="section-header">AI Agents</h2>
+            <h3>1. Requirement Analyst</h3>
+            <p><strong>Role:</strong> Analyze user requirements for clarity and core features.</p>
+            <p><strong>System Message:</strong> "You are a skilled Requirement Analyst. Given an app-building query, identify and clarify the user’s main requirements and desired features. Summarize the app’s core functions."</p>
+            
+            <h3>2. System Architect</h3>
+            <p><strong>Role:</strong> Design an architecture that meets the app's requirements.</p>
+            <p><strong>System Message:</strong> "You are an experienced System Architect. Based on the identified requirements, propose an architecture that includes the necessary components, databases, and integrations."</p>
+            
+            <h3>3. Frontend Developer</h3>
+            <p><strong>Role:</strong> Plan the frontend using React based on the architecture.</p>
+            <p><strong>System Message:</strong> "You are a skilled Frontend Developer with expertise in React. Based on the app’s architecture, design the frontend structure, components, and main user interactions in React."</p>
+            
+            <h3>4. Backend Developer</h3>
+            <p><strong>Role:</strong> Design backend services to support app functionality.</p>
+            <p><strong>System Message:</strong> "You are a Python Backend Developer. Given the app’s architecture, design the backend services, APIs, and database interactions necessary to support the frontend and app features."</p>
+        </section>
+
+        <section id="workflow">
+            <h2 class="section-header">Task Workflow</h2>
+            <p>The tasks are processed sequentially as follows:</p>
+            <ol>
+                <li><strong>Analyze requirements:</strong> Define the core app features and goals.</li>
+                <li><strong>Design system architecture:</strong> Propose an architecture with necessary components.</li>
+                <li><strong>Plan frontend in React:</strong> Outline the user interface and interactions.</li>
+                <li><strong>Plan backend in Python:</strong> Define APIs and backend services to support the app.</li>
+            </ol>
+        </section>
+
+        <section id="error-handling">
+            <h2 class="section-header">Error Handling</h2>
+            <p>If an error occurs, the API returns the following response structure:</p>
+            <div class="code-block">
+                <strong>Example Error Response:</strong>
+                <pre>{
+    "error": "User query is required"
+}</pre>
+            </div>
+            <p>Potential errors include:</p>
+            <ul>
+                <li><strong>400 Bad Request:</strong> Missing 'user_query' in the request body.</li>
+                <li><strong>500 Internal Server Error:</strong> Issues with pipeline task processing.</li>
+            </ul>
+        </section>
+        
+        <footer class="mt-5">
+            <p class="text-center">Genaitor - © 2024</p>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

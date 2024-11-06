@@ -1,33 +1,43 @@
 from flask import Blueprint, request, jsonify
 from config import config
-from utils.agents import Agent
+from utils.agents import Agent, Orchestrator
 
 segmentation_bp = Blueprint('image_segmentator_specialist', __name__)
 
-# Define individual agents for image segmentation tasks
-image_preprocessing_agent = Agent(
-    role='Image Preprocessing Agent',
-    system_message=(
-        "You are an AI agent specialized in preprocessing images for segmentation tasks. "
-        "Given an image, you will handle operations like resizing, normalization, and noise reduction to ensure it is ready for segmentation."
-    )
-)
+# Define agents for image segmentation tasks
+agents = {
+    'image_preprocessing_agent': Agent(
+        role='Image Preprocessing Agent',
+        system_message=(
+            "You are an AI agent specialized in preprocessing images for segmentation tasks. "
+            "Given an image, you will handle operations like resizing, normalization, and noise reduction to ensure it is ready for segmentation."
+        )
+    ),
+    'segmentation_algorithm_agent': Agent(
+        role='Segmentation Algorithm Agent',
+        system_message=(
+            "You are an AI agent specialized in performing image segmentation. "
+            "Using libraries like OpenCV and Python, you will apply algorithms like thresholding, contour detection, and deep learning-based methods to segment the given image."
+        )
+    ),
+    'postprocessing_agent': Agent(
+        role='Postprocessing Agent',
+        system_message=(
+            "You are an AI agent specialized in postprocessing segmented images. "
+            "You will handle tasks such as smoothing, contour extraction, or labeling regions based on segmentation results."
+        )
+    ),
+}
 
-segmentation_algorithm_agent = Agent(
-    role='Segmentation Algorithm Agent',
-    system_message=(
-        "You are an AI agent specialized in performing image segmentation. "
-        "Using libraries like OpenCV and Python, you will apply algorithms like thresholding, contour detection, and deep learning-based methods to segment the given image."
-    )
-)
+# Define the task flow for image segmentation
+tasks = [
+    {"description": "Preprocess the image for segmentation", "agent": agents['image_preprocessing_agent']},
+    {"description": "Apply segmentation algorithm", "agent": agents['segmentation_algorithm_agent']},
+    {"description": "Postprocess the segmented image", "agent": agents['postprocessing_agent']}
+]
 
-postprocessing_agent = Agent(
-    role='Postprocessing Agent',
-    system_message=(
-        "You are an AI agent specialized in postprocessing segmented images. "
-        "You will handle tasks such as smoothing, contour extraction, or labeling regions based on segmentation results."
-    )
-)
+# Initialize Orchestrator to manage the task flow
+segmentation_orchestrator = Orchestrator(agents=agents, tasks=tasks, process='sequential', cumulative=False)
 
 # Define the main route for image segmentation tasks
 @segmentation_bp.route('/image-segmentator-specialist', methods=['POST'])
@@ -39,27 +49,13 @@ def segmentate():
     if not user_query:
         return jsonify({"error": "User query is required"}), 400
 
-    # Pipeline process
-    # Step 1: Preprocess the image for segmentation
-    preprocessing_output = image_preprocessing_agent.perform_task(user_query)
-    if "error" in preprocessing_output:
-        return jsonify({"error": "Image preprocessing failed.", "details": preprocessing_output}), 500
+    # Use orchestrator to handle the pipeline for image segmentation
+    result = segmentation_orchestrator.kickoff(user_query)
 
-    # Step 2: Apply segmentation algorithm
-    segmentation_output = segmentation_algorithm_agent.perform_task(user_query)
-    if "error" in segmentation_output:
-        return jsonify({"error": "Segmentation algorithm failed.", "details": segmentation_output}), 500
+    if "error" in result:
+        return jsonify(result), 500
 
-    # Step 3: Postprocess the segmented image
-    postprocessing_output = postprocessing_agent.perform_task(user_query)
-    if "error" in postprocessing_output:
-        return jsonify({"error": "Postprocessing failed.", "details": postprocessing_output}), 500
+    # Format the output from each task in the pipeline
+    response_data = {task['description']: res for task, res in zip(tasks, result["output"])}
 
-    # Format the final response with each agent's output
-    response_data = {
-        "preprocessed_image": preprocessing_output,
-        "segmented_image": segmentation_output,
-        "postprocessed_image": postprocessing_output
-    }
-
-    return jsonify(response_data)
+    return jsonify(response_data), 200

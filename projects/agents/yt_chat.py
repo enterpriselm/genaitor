@@ -2,28 +2,37 @@ from flask import Blueprint, request, jsonify
 from config import config
 from utils.video_utils import transcribe_audio
 from langchain_community.document_loaders import YoutubeLoader
-from utils.agents import Agent
+from utils.agents import Agent, Orchestrator
 
 video_explainer_bp = Blueprint('video_explainer', __name__)
 
 # Define individual agents for different tasks
-video_loader_agent = Agent(
-    role='Video Loader Agent',
-    system_message=(
-        "You are an AI agent specialized in loading and transcribing YouTube videos or local audio files. "
-        "Your task is to fetch and transcribe video content or audio content into text format. "
-        "Provide the transcript of the video or audio file."
+agents = {
+    'video_loader_agent' : Agent(
+        role='Video Loader Agent',
+        system_message=(
+            "You are an AI agent specialized in loading and transcribing YouTube videos or local audio files. "
+            "Your task is to fetch and transcribe video content or audio content into text format. "
+            "Provide the transcript of the video or audio file."
+        )
+    ),
+    'ai_explainer_agent' : Agent(
+        role='AI Explainer Agent',
+        system_message=(
+            "You are an AI agent specialized in explaining video content. "
+            "Your task is to generate a helpful and informative explanation of the video transcript, "
+            "based on the user's needs. Please provide the necessary explanation based on the given transcript."
+     )
     )
-)
+}
 
-ai_explainer_agent = Agent(
-    role='AI Explainer Agent',
-    system_message=(
-        "You are an AI agent specialized in explaining video content. "
-        "Your task is to generate a helpful and informative explanation of the video transcript, "
-        "based on the user's needs. Please provide the necessary explanation based on the given transcript."
-    )
-)
+tasks = [
+    {"description": "Load and transcribe video", "agent": agents['video_loader_agent']},
+    {"description": "Generate explanation", "agent": agents['ai_explainer_agent']},
+]
+
+# Initialize Orchestrator to manage the task flow
+video_explainer_orchestrator = Orchestrator(agents=agents, tasks=tasks, process='sequential', cumulative=False)
 
 prompt_template = """
 You are a helpful assistant that explains YT videos. Given the following video transcript:
@@ -66,10 +75,12 @@ def explain_video():
 
     # Step 2: Generate an Explanation (via AI explainer agent)
     prompt = prompt_template.format(video_transcript=video_transcript)
-    explanation = ai_explainer_agent.perform_task({"video_transcript": video_transcript})
+    result = video_explainer_orchestrator.kickoff(prompt)
     
-    if "error" in explanation:
-        return jsonify({"error": "Failed to generate explanation", "details": explanation}), 500
+    if "error" in result:
+        return jsonify(result), 500
 
-    # Return the final response with the explanation
-    return jsonify({"ai_response": explanation["content"]})
+    # Format the output from each task in the pipeline
+    response_data = {task['description']: res for task, res in zip(tasks, result["output"])}
+
+    return jsonify(response_data), 200
