@@ -12,7 +12,8 @@ def generate_agent():
     if not user_query:
         return jsonify({"error": "User query is required"}), 400
 
-    response = make_llama_request(user_query)
+    user_query='i need an agent to build rockets'
+    response = make_llama_request(user_query, system_message="You're Genaitor, an AI agent expert in creating new AI Agents. Gimme the prompt for an agent based on the user query.")
     if response.get("error"):
         return jsonify(response), response["status_code"]
     
