@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Planner</title>
+</head>
+<body>
+    <h1>✈️ Travel Planner 🗺️</h1>
+    <form action="/generate_plan" method="POST">
+        <label for="from_city">From City:</label>
+        <input type="text" id="from_city" name="from_city" required><br><br>
+
+        <label for="destination_city">Destination City:</label>
+        <input type="text" id="destination_city" name="destination_city" required><br><br>
+
+        <label for="interests">Your Interests:</label>
+        <input type="text" id="interests" name="interests" required><br><br>
+
+        <label for="date_from">Start Date:</label>
+        <input type="date" id="date_from" name="date_from" required><br><br>
+
+        <label for="date_to">End Date:</label>
+        <input type="date" id="date_to" name="date_to" required><br><br>
+
+        <input type="submit" value="Generate Travel Plan">
+    </form>
+
+    <div id="result">
+        <!-- Results will be injected here -->
+    </div>
+
+    <script>
+        const form = document.querySelector('form');
+        form.onsubmit = async (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            document.getElementById('result').innerText = JSON.stringify(result, null, 2);
+        };
+    </script>
+</body>
+</html>
