@@ -1,5 +1,5 @@
 from flask import Flask
-from llama_agent import llama_agent_bp
+from genaitor.llama_agent import llama_agent_bp
 
 app = Flask(__name__)
 

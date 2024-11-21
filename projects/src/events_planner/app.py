@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from datetime import datetime, timedelta
-from config import config
-from utils.agents import Agent, Orchestrator, Task
+from genaitor.config import config
+from genaitor.utils.agents import Agent, Orchestrator, Task
 
 # Initialize Flask app
 app = Flask(__name__)

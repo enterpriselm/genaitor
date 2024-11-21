@@ -1,5 +1,5 @@
 import requests
-from config import config
+from genaitor.config import config
 
 def get_llama_answers(user_query, system_message, max_tokens=150, temperature=0.8):
     payload = {
@@ -20,7 +20,7 @@ def get_llama_answers(user_query, system_message, max_tokens=150, temperature=0.
     except (KeyError, IndexError, TypeError) as e:
         return {"error": "Unexpected response structure from AI service", "status_code": 500}
     
-def make_llama_request(user_query, system_message, max_tokens=50, max_iterations=20):
+def make_llama_request(user_query, system_message, max_tokens=50, max_iterations=20, temperature=0.8):
     full_response = ""
     current_query = user_query
     iteration = 0
@@ -29,7 +29,7 @@ def make_llama_request(user_query, system_message, max_tokens=50, max_iterations
         while iteration < max_iterations:
             iteration += 1
             # Get the response from LLaMA
-            response_chunk = get_llama_answers(current_query, system_message, max_tokens=max_tokens)['content']
+            response_chunk = get_llama_answers(current_query, system_message, max_tokens=max_tokens, temperature=temperature)['content']
 
             # Append the chunk to the full response
             full_response += response_chunk.strip() + " "

@@ -5,13 +5,16 @@ from pydantic import BaseModel, Field
 
 
 class Agent:
-    def __init__(self, role, goal="", system_message=""):
+    def __init__(self, role, goal="", system_message="", temperature=0.8, max_tokens=50, max_iterations=20):
         self.role = role
         self.goal = goal
         self.system_message = system_message
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.max_iterations = max_iterations
 
     def perform_task(self, input_text):
-        response = make_llama_request(input_text, system_message=self.system_message)
+        response = make_llama_request(input_text, system_message=self.system_message, temperature=self.temperature, max_iterations=self.max_iterations, max_tokens=self.max_tokens)
         if response.get("error"):
             return {"error": f"{self.role} encountered an error: {response['error']}"}
         return response["content"]

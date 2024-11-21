@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from config import config
-from utils.request_helper import make_llama_request
-from utils.clean_response import clean_genaitor_response
+from genaitor.config import config
+from genaitor.request_helper import make_llama_request
+from genaitor.clean_response import clean_genaitor_response
 
 system_message = """You're Genaitor, an AI agent expert in creating new AI Agents. 
 Gimme the prompt for an agent based on this {user_query}. 
