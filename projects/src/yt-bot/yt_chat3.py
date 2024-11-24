@@ -3,71 +3,6 @@ from genaitor.video_utils import transcribe_audio
 from langchain_community.document_loaders import YoutubeLoader
 from genaitor.utils.agents import Agent, Orchestrator, Task
 
-# Define individual agents for different tasks
-agents = {
-    'ai_explainer_agent': Agent(
-        role='AI Explainer Agent',
-        system_message=(
-            """You are an AI agent specializing in summarizing and explaining long texts of any complexity."""
-        ),
-        temperature=0.8,
-        max_tokens=2000,
-        max_iterations=1,
-    ),
-    'ai_answer_agent': Agent(
-        role='AI Answer Agent',
-        system_message=(
-            """You are an AI agent specializing in answering questions from texts."""
-        ),
-        temperature=0.8,
-        max_tokens=2000,
-        max_iterations=1,
-    )
-}
-
-class VideoTasks():
-
-    def summary_task(self, agent):
-        return Task(
-            description=f"""
-            Your task involves extracting the key points and providing a concise, clear, and coherent summary. 
-            Focus on the main ideas, arguments, and conclusions while excluding unnecessary details, examples, or elaborations. 
-            The summary should be comprehensive yet brief, capturing the essence of the original text in no more than 1-3 paragraphs.
-            """,
-            expected_output=f"""
-            A brief summary of the gathered information, in a concise text format.
-            """,
-            agent=agent,
-            output_file='trip_summary.txt',
-            goal="""Based on the following text:
-            {review}
-            
-            Generate a complete review of two paragraphs.
-            """
-        )
-
-    def needs_based_response_task(self, agent):
-        return Task(
-            description=f"""
-            Your task requires the to respond to the user's specific needs by considering both the user input and the review previously conducted by the agent. 
-            You should craft a tailored response that directly addresses the user's requirements and provides useful, actionable information based on the prior review.
-            """,
-            expected_output=f"""
-            A clear and personalized response that answers the user's specific question or request.
-            """,
-            agent=agent,
-            output_file='needs_based_response.txt',
-            goal="""
-            Based on this text:
-            {review}
-            
-            Based on this prompt i send you right now, please do the follow for me:
-            {user_query}
-            """
-        )
-
-video_tasks = VideoTasks()
-
 # Placeholder for video id and file path
 video_id = '5rqZyKeErkY'
 file_path = ''
@@ -96,12 +31,127 @@ elif file_path != '':
 if not video_transcript:
     print("Failed to load or transcribe video")
 
-summary_task = video_tasks.summary_task(agents['ai_explainer_agent'])
-needs_based_response_task = video_tasks.needs_based_response_task(agents['ai_answer_agent'])
+from genaitor.config import config
+from genaitor.utils.agents import Agent, Orchestrator, Task
 
-# Step 2: Create the Orchestrator and add tasks
-video_explainer_orchestrator = Orchestrator(agents=agents, tasks=[summary_task, needs_based_response_task], process='sequential', cumulative=False)
+agents = {
+    'extractor': Agent(
+        role='Text Extractor Agent',
+        system_message=(
+            "You are an expert in analyzing and extracting relevant information from text. "
+            "When given a user's query and a text, identify and return the part of the text that justifies the answer. "
+        ),
+        temperature=0.7,
+        max_tokens=2000,
+        max_iterations=1
+    ),
+    'validator': Agent(
+        role='Validation Agent',
+        system_message=(
+            "You are an expert in logical reasoning and validation. "
+            "Given a user's question and the answer extracted from the text, evaluate if the answer makes sense in the context of the question. "
+            "Provide a response indicating whether the answer is coherent and why."
+        ),
+        temperature=0.6,
+        max_tokens=1500,
+        max_iterations=1
+    ),
+    'refiner': Agent(
+        role='Refinement Agent',
+        system_message=(
+            "You are an expert in refining and improving text. "
+            "Given a question and its initial response, refine the response to make it more precise, coherent, and helpful."
+        ),
+        temperature=0.8,
+        max_tokens=2000,
+        max_iterations=1
+    )
+}
 
-# Step 3: Execute the Orchestrator's tasks
-user_query = "List for me all the pokemon that appear on the text"
-result = video_explainer_orchestrator.kickoff(user_query=user_query, review=video_transcript.page_content)
+class QueryProcessingTasks():
+
+    def extraction_task(self, agent):
+        return Task(
+            description=f"""
+            This task involves extracting relevant information from a provided text based on the user's query. The extracted content must directly address the user's question and justify the response with specific portions of the text.
+            """,
+            expected_output=f"""
+            In plain text: A concise excerpt from the input text that directly justifies the answer to the user's query.
+            """,
+            agent=agent,
+            output_file='extracted_text.txt',
+            goal="""Identify the most relevant part of the provided text that justifies the answer to the user's query.
+            User's Query: {user_query}
+            Input Text: {input_text}"""
+        )
+
+    def validation_task(self, agent):
+        return Task(
+            description=f"""
+            This task evaluates whether the answer extracted from the text aligns logically and contextually with the user's query. 
+            The agent will provide a rationale for its assessment.
+            """,
+            expected_output=f"""
+            A plain text response stating whether the answer makes sense, followed by a brief explanation.
+            """,
+            agent=agent,
+            output_file='validation_report.txt',
+            goal="""Evaluate the coherence of the extracted answer in the context of the user's query.
+            User's Query: {user_query}
+            Extracted Answer: {extracted_answer}"""
+        )
+
+    def refinement_task(self, agent):
+        return Task(
+            description=f"""
+            This task refines the answer to ensure it is precise, coherent, and directly addresses the user's query.
+            """,
+            expected_output=f"""
+            A plain text version of the refined answer.
+            """,
+            agent=agent,
+            output_file='refined_answer.txt',
+            goal="""Refine the extracted answer to make it more precise and helpful.
+            User's Query: {user_query}
+            Initial Answer: {extracted_answer}"""
+        )
+
+
+# Variables to be inserted in kickoff
+user_query = "What is the main point of the article?"
+input_text = (
+    "Physics-informed neural networks (PINNs) provide an innovative approach to solving differential equations. "
+    "By embedding the physics laws directly into the neural network architecture, PINNs can solve forward and inverse problems "
+    "more efficiently compared to traditional numerical methods."
+)
+
+query_processing_tasks = QueryProcessingTasks()
+
+tasks = [
+    query_processing_tasks.extraction_task(
+        agent=agents['extractor']
+    )
+]
+
+orchestrator = Orchestrator(agents=agents, tasks=tasks, process='sequential', cumulative=False)
+
+# Inputs for the orchestrator
+user_query = "Which pokemon appears on text?"
+
+result = orchestrator.kickoff(user_query=user_query, input_text=video_transcript.page_content)
+print(result)
+
+tasks = [
+    query_processing_tasks.validation_task(
+        agent=agents['validator']
+    ),
+    query_processing_tasks.refinement_task(
+        agent=agents['refiner']
+    )
+]
+
+for key_answer in result['output']['output'][0].keys():
+    extracted_answer = result['output']['output'][0][key_answer]
+
+orchestrator = Orchestrator(agents=agents, tasks=tasks, process='sequential', cumulative=False)
+result = orchestrator.kickoff(user_query=user_query, extracted_answer=extracted_answer)
