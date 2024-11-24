@@ -1,36 +1,114 @@
 .App {
-    text-align: center;
-    font-family: Arial, sans-serif;
-  }
-  
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  color: #333; /* Better readability */
+  padding: 20px;
+  background-color: #f9f9f9; /* Subtle background color */
+  min-height: 100vh; /* Ensure it covers the full viewport */
+}
+
+h1 {
+  font-size: 2rem;
+  color: #0056b3; /* Make the title stand out */
+  margin-bottom: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffffff; /* Separate form visually */
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+label {
+  width: 100%; /* Align labels with inputs */
+  margin: 10px 0;
+  text-align: left;
+  font-weight: bold;
+}
+
+input,
+textarea {
+  width: 100%;
+  max-width: 500px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  margin-top: 5px;
+}
+
+textarea {
+  height: 120px; /* Slightly taller for better usability */
+  resize: vertical; /* Allow vertical resizing */
+}
+
+button {
+  margin-top: 15px;
+  background-color: #0056b3;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #004494; /* Darker shade on hover */
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.response {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Subtle shadow for emphasis */
+  width: 90%;
+  max-width: 600px;
+  text-align: left;
+  word-wrap: break-word;
+}
+
+.response h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+  color: #0056b3; /* Match the app's theme */
+}
+
+.response p {
+  margin: 10px 0;
+  line-height: 1.5; /* Improve text readability */
+}
+
+@media (max-width: 600px) {
   form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 20px;
+    padding: 15px;
   }
-  
-  label {
-    margin: 10px 0;
-  }
-  
+
+  input,
   textarea {
-    width: 100%;
-    max-width: 500px;
-    height: 100px;
+    font-size: 0.9rem;
   }
-  
+
   button {
-    margin-top: 15px;
+    font-size: 0.9rem;
   }
-  
+
   .response {
-    margin-top: 20px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    width: 80%;
-    max-width: 600px;
-    text-align: left;
-    word-wrap: break-word;
+    padding: 15px;
   }
-  
+}

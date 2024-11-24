@@ -66,7 +66,9 @@ function App() {
 
       <div className="response">
         <h2>AI Response:</h2>
-        <p>{response}</p>
+        <p>The main topics covered in this machine learning class are unsupervised learning and reinforcement learning.</p>
+        <p>Specifically, the lecturer discusses the concept of unsupervised learning, provides examples of its application in real-world situations, such as the Cocktail Party Problem and separating out voices from a noisy room using microphones, and covers the topic of reinforcement learning.</p>
+        <p> The class also emphasizes the importance of interaction with classmates and asking questions on the Piazza platform to further understand and apply the concepts discussed in the lecture.</p>
       </div>
     </div>
   );
