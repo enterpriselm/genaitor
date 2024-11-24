@@ -1,48 +1,46 @@
 from genaitor.request_helper import make_llama_request
-from multiprocessing import Pool, Manager
-from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field
+from typing import Dict, Any
+import re
 
 
 class Agent:
-    def __init__(self, role, goal="", system_message=""):
+    def __init__(self, role, system_message="", temperature=0.8, max_tokens=50, max_iterations=20):
         self.role = role
-        self.goal = goal
         self.system_message = system_message
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.max_iterations = max_iterations
+    
+    def configure(self, **kwargs):
+        """Dynamically update agent parameters."""
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                raise AttributeError(f"Attribute {key} does not exist in the agent.")
 
-    def perform_task(self, input_text):
-        response = make_llama_request(input_text, system_message=self.system_message)
+    def perform_task(self, prompt):
+        response = make_llama_request(prompt, system_message=self.system_message, temperature=self.temperature, max_iterations=self.max_iterations, max_tokens=self.max_tokens)
         if response.get("error"):
             return {"error": f"{self.role} encountered an error: {response['error']}"}
         return response["content"]
 
-class Task(BaseModel):
-    """Simplified Task class for execution.
+class Task:
+    def __init__(self, description, expected_output, agent, goal="", context=None, output_file=None):
+        self.description = description
+        self.expected_output = expected_output
+        self.agent = agent
+        self.context = context or []
+        self.output_file = output_file
+        self.goal = goal
+        self.output = ""
 
-    Attributes:
-        description: A brief description of the task.
-        expected_output: The desired result of the task.
-        config: Optional configuration parameters for task execution.
-        tools: Optional list of tools available for task execution.
-    """
-    description: str = Field(description="Description of the task.")
-    expected_output: str = Field(description="Expected output for the task.")
-    config: Optional[Dict[str, Any]] = Field(default=None, description="Configuration for the task.")
-    tools: Optional[List[str]] = Field(default_factory=list, description="Tools available for this task.")
-    output: Optional[Any] = Field(default=None, description="The result of task execution.")
-
-    def execute(self) -> None:
-        """Placeholder for executing the task.
-
-        This should contain logic to perform the task using the description, tools, and config.
-        """
-        # Example placeholder logic
-        self.output = f"Task '{self.description}' executed successfully."
-        print(self.output)
-
-    def __str__(self) -> str:
-        return f"Task({self.id}): {self.description}"
-        
+    def execute(self, prompt):
+        print(f"Agent: {self.agent.role}")
+        print(f"Task: {self.description}")
+        self.output = self.agent.perform_task(prompt)
+        print(f"output: {self.output}")  # Debugging line
+        return self.output    
 
 class Orchestrator:
     def __init__(self, agents, tasks, process='sequential', cumulative=False):
@@ -52,79 +50,37 @@ class Orchestrator:
         self.cumulative = cumulative
         self.results = []
 
-    def kickoff(self, user_query):
+    def kickoff(self, **kwargs):
         """Executes the task flow, passing output from one agent to the next."""
         # Initialize the cumulative input with the user's query
         if self.process == 'sequential':
-            return self._sequential_execution(user_query)
+            answer = self._sequential_execution(**kwargs)
         elif self.process == 'parallel':
-            return self._parallel_execution(user_query)
-        else:
-            return {"error":"Invalid process type specified"}
-        
-    def _sequential_execution(self, user_query: str) -> Dict[str, Any]:
+            answer = self._parallel_execution(**kwargs)
+        return {"output":answer}
+    
+    def _sequential_execution(self, **kwargs) -> Dict[str, Any]:
         """Executes tasks in a sequence, passing output from one to the next."""
-        cumulative_input = user_query
         self.results.clear()
-
+        prompt = ""
         for task in self.tasks:
-            agent = self._get_agent_for_task(task)
-            output = agent.perform_task(cumulative_input)
-            if 'error' in output:
-                return {"error": f"Error during task execution: {output['error']}"}
-
-            self.results.append({task.description: output})
-            cumulative_input = output
-
+            str_parameters = re.findall(r"{(.*?)}", task.goal)
+            for parameter in str_parameters:
+                task.goal = task.goal.replace("{"+parameter+"}", kwargs[parameter])
+            prompt+=task.agent.system_message
+            prompt+=task.description
+            prompt+="You should return "
+            prompt+=task.expected_output
+            prompt+=task.goal
+            prompt = prompt.replace("            ","") 
+            result = task.execute(prompt)
+            print(f"Task result: {result}")
+            self.results.append({task.description: result})
+            if self.cumulative:
+                prompt=result
+            else:
+                prompt=""
         return {"output": self.results}
     
     def _parallel_execution(self, user_query: str) -> Dict[str, Any]:
-        """Executes tasks in parallel using multiprocessing, with each task receiving the initial user_query."""
-        with Manager() as manager:
-            results = manager.list()
-            # Shared dictionary for cumulative input across tasks
-            cumulative_data = manager.dict() if self.cumulative else None
-
-            # Initialize cumulative_data with user query if cumulative is enabled
-            if self.cumulative:
-                cumulative_data['input'] = user_query
-
-            # Prepare tasks for multiprocessing
-            tasks_to_run = [
-                (task, user_query, cumulative_data, results)
-                for task in self.tasks
-            ]
-
-            # Use multiprocessing Pool to run tasks in parallel
-            with Pool() as pool:
-                pool.starmap(self._run_task, tasks_to_run)
-
-            # Convert manager list to a standard list and return
-            self.results = list(results)
-            return {"output": self.results}
-
-    def _run_task(self, task: Task, user_query: str, cumulative_data: Optional[Dict[str, str]], results: list):
-        """Helper function to execute a task."""
-        # Use cumulative input if enabled
-        input_data = cumulative_data['input'] if cumulative_data else user_query
-
-        # Execute the task
-        task.execute(input_data)
-        results.append({task.description: task.output})
-
-        # Update cumulative data if cumulative interaction is enabled
-        if cumulative_data:
-            cumulative_data['input'] = task.output
-
-    def _get_agent_for_task(self, task: Task) -> Agent:
-        """Assigns an agent to a task based on task description"""
-        if 'city selection' in task.description.lower():
-            return self.agents['city_selection_agent']
-        
-        if 'local_guide' in task.description.lower():
-            return self.agents['local_expert']
-        
-        if 'planner' in task.description.lower():
-            return self.agents['travel_concierge']
-        
-        return self.agents.get('local_expert', None)
+        pass

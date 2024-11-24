@@ -20,7 +20,7 @@ def get_llama_answers(user_query, system_message, max_tokens=150, temperature=0.
     except (KeyError, IndexError, TypeError) as e:
         return {"error": "Unexpected response structure from AI service", "status_code": 500}
     
-def make_llama_request(user_query, system_message, max_tokens=50, max_iterations=20, temperature=0.8):
+def make_llama_request(user_query, system_message, max_tokens=2000, max_iterations=1, temperature=0.8):
     full_response = ""
     current_query = user_query
     iteration = 0
