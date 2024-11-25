@@ -89,10 +89,6 @@ class QueryProcessingTasks():
             Initial Answer: {extracted_answer}"""
         )
 
-
-app = Flask(__name__)
-CORS(app)
-
 def run_genaitor(video_transcription, user_query):
     query_processing_tasks = QueryProcessingTasks()
 
@@ -121,6 +117,9 @@ def run_genaitor(video_transcription, user_query):
     return orchestrator.kickoff(user_query=user_query, extracted_answer=extracted_answer)
 
 
+app = Flask(__name__)
+CORS(app)
+
 @app.route('/youtube', methods=['POST'])
 def get_answer():
     data = request.json
@@ -143,6 +142,8 @@ def get_answer():
         return jsonify({"error": "You must provide a YouTube URL"}), 400
 
     answer = run_genaitor(video_transcription=video_transcript, user_query=user_query)
+    for answer_key in answer['output']['output'][0].keys():
+        answer = answer['output']['output'][-1][answer_key]
     return jsonify({"answer":answer})
 
 if __name__ == '__main__':
