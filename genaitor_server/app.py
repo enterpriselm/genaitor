@@ -20,4 +20,4 @@ if __name__ == '__main__':
     debug = os.getenv('FLASK_DEBUG').lower() in ['true', '1']
     print("WARNING: Use Gunicorn or uWSGI in production!")
     
-    app.run(host=host, port=port, debug=debug)
+    app.run(host=host, port=port, debug=debug, ssl_context=('cert.pem', 'key.pem'))
