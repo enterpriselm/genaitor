@@ -1,15 +1,24 @@
 import os
 from flask import Flask
-from flask_talisman import Talisman
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
 from genaitor.llama_agent import llama_agent_bp
+from redis import Redis
+from flasgger import Swagger 
 
 app = Flask(__name__)
 
 Talisman(app)
 
-limiter = Limiter(key_func=get_remote_address)
+swagger = Swagger(app, template_file='swagger_config.yml')
+
+redis_connection = Redis(host='localhost', port=6379)
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    storage_uri="redis://localhost:6379"
+)
 limiter.init_app(app)
 
 app.register_blueprint(llama_agent_bp)

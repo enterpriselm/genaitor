@@ -26,7 +26,7 @@ def get_llama_answers(user_query, system_message, max_tokens=150, temperature=0.
         "temperature": temperature
     }
     try:
-        response = requests.post(config.LLAMA_API_URL, headers=config.HEADERS, json=payload, timeout=90)
+        response = requests.post(config.LLAMA_API_URL, headers=config.HEADERS, json=payload, timeout=300)
         response.raise_for_status()
         return {"content": response.json()['choices'][0]['message']['content']}
     except requests.exceptions.RequestException as e:

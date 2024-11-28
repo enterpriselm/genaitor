@@ -3,3 +3,5 @@ gunicorn==21.2.0
 flask-limiter
 python-dotenv
 requests
+redis
+flasgger
