@@ -6,6 +6,6 @@ echo "Installing dependencies..."
 pip install -r requirements.txt
 
 echo "Starting Flask API..."
-gunicorn -w 4 -b 0.0.0.0:8000 app:app --timeout 120
+gunicorn -w 4 -b 0.0.0.0:5000 app:app --timeout 120
 
 trap "kill $LAVA_PID" EXIT

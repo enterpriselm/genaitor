@@ -9,7 +9,11 @@ from flasgger import Swagger
 
 app = Flask(__name__)
 
-Talisman(app)
+csp = {
+    'default-src': "'self'"
+}
+
+Talisman(app, content_security_policy=csp, force_https=False)
 
 swagger = Swagger(app, template_file='swagger_config.yml')
 
