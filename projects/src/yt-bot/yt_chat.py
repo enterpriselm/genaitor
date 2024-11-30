@@ -3,7 +3,7 @@ from langchain_community.document_loaders import YoutubeLoader
 from genaitor.config import config
 from genaitor.utils.agents import Agent, Orchestrator, Task
 from flask_cors import CORS
-from utils import extract_text_from_doc, extract_text_from_json, extract_text_from_pdf, extract_text_from_ppt, read_csv, read_excel, transcribe_audio_file
+from utils import extract_text_from_doc, extract_text_from_json, extract_text_from_pdf, extract_text_from_ppt, read_csv, read_excel, transcribe_audio_file, image_to_text
 
 agents = {
     'extractor': Agent(
@@ -171,6 +171,8 @@ def get_answer():
                 text+=read_csv(media)
             except:
                 pass
+        elif media.endswith('.jpg') or media.endswith('.jpeg') or media.endswith('.png'):
+            text+=image_to_text(media)
         else:
             pass
 
