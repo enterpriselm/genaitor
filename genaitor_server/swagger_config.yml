@@ -1,0 +1,7 @@
+swagger: "2.0"
+info:
+  title: "API Documentation"
+  description: "API Documentation"
+  version: "1.0.0"
+host: "localhost:5000"
+basePath: "/"
