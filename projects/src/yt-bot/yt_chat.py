@@ -1,111 +1,183 @@
 from flask import Flask, request, jsonify
-import sqlite3
-import requests
 from langchain_community.document_loaders import YoutubeLoader
-import json
-import speech_recognition as sr
-from pydub import AudioSegment
-from moviepy.editor import VideoFileClip
-import os
+from genaitor.config import config
+from genaitor.utils.agents import Agent, Orchestrator, Task
 from flask_cors import CORS
+from utils import extract_text_from_doc, extract_text_from_json, extract_text_from_pdf, extract_text_from_ppt, read_csv, read_excel, transcribe_audio_file
+
+agents = {
+    'extractor': Agent(
+        role='Text Extractor Agent',
+        system_message=(
+            "You are an expert in analyzing and extracting relevant information from text. "
+            "When given a user's query and a text, identify and return the part of the text that justifies the answer. "
+        ),
+        temperature=0.7,
+        max_tokens=2000,
+        max_iterations=1
+    ),
+    'validator': Agent(
+        role='Validation Agent',
+        system_message=(
+            "You are an expert in logical reasoning and validation. "
+            "Given a user's question and the answer extracted from the text, evaluate if the answer makes sense in the context of the question. "
+            "Provide a response indicating whether the answer is coherent and why."
+        ),
+        temperature=0.6,
+        max_tokens=1500,
+        max_iterations=1
+    ),
+    'refiner': Agent(
+        role='Refinement Agent',
+        system_message=(
+            "You are an expert in refining and improving text. "
+            "Given a question and its initial response, refine the response to make it more precise, coherent, and helpful."
+        ),
+        temperature=0.8,
+        max_tokens=2000,
+        max_iterations=1
+    )
+}
+
+class QueryProcessingTasks():
+
+    def extraction_task(self, agent):
+        return Task(
+            description=f"""
+            This task involves extracting relevant information from a provided text based on the user's query. The extracted content must directly address the user's question and justify the response with specific portions of the text.
+            """,
+            expected_output=f"""
+            In plain text: A concise excerpt from the input text that directly justifies the answer to the user's query.
+            """,
+            agent=agent,
+            output_file='extracted_text.txt',
+            goal="""Identify the most relevant part of the provided text that justifies the answer to the user's query.
+            User's Query: {user_query}
+            Input Text: {input_text}"""
+        )
+
+    def validation_task(self, agent):
+        return Task(
+            description=f"""
+            This task evaluates whether the answer extracted from the text aligns logically and contextually with the user's query. 
+            The agent will provide a rationale for its assessment.
+            """,
+            expected_output=f"""
+            A plain text response stating whether the answer makes sense, followed by a brief explanation.
+            """,
+            agent=agent,
+            output_file='validation_report.txt',
+            goal="""Evaluate the coherence of the extracted answer in the context of the user's query.
+            User's Query: {user_query}
+            Extracted Answer: {extracted_answer}"""
+        )
+
+    def refinement_task(self, agent):
+        return Task(
+            description=f"""
+            This task refines the answer to ensure it is precise, coherent, and directly addresses the user's query.
+            """,
+            expected_output=f"""
+            A plain text version of the refined answer.
+            """,
+            agent=agent,
+            output_file='refined_answer.txt',
+            goal="""Refine the extracted answer to make it more precise and helpful.
+            User's Query: {user_query}
+            Initial Answer: {extracted_answer}"""
+        )
+
+def run_genaitor(text, user_query):
+    query_processing_tasks = QueryProcessingTasks()
+
+    tasks = [
+        query_processing_tasks.extraction_task(
+            agent=agents['extractor']
+        )
+    ]
+
+    orchestrator = Orchestrator(agents=agents, tasks=tasks, process='sequential', cumulative=False)
+    result = orchestrator.kickoff(user_query=user_query, input_text=text)
+
+    tasks = [
+        query_processing_tasks.validation_task(
+            agent=agents['validator']
+        ),
+        query_processing_tasks.refinement_task(
+            agent=agents['refiner']
+        )
+    ]
+
+    for key_answer in result['output']['output'][0].keys():
+        extracted_answer = result['output']['output'][0][key_answer]
+
+    orchestrator = Orchestrator(agents=agents, tasks=tasks, process='sequential', cumulative=False)
+    return orchestrator.kickoff(user_query=user_query, extracted_answer=extracted_answer)
+
 
 app = Flask(__name__)
 CORS(app)
 
-LLAMA_API_URL = 'http://localhost:8080/v1/chat/completions'
-HEADERS = {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer no-key"
-}
-
-prompt_template = """
-You are a helpful assistant that explains YT videos. Given the following video transcript:
-{video_transcript}
-and the following history of chat:
-{history}
-Help the user with the following request:
-"""
-
-def transcribe_audio(file_path):
-    recognizer = sr.Recognizer()
-
-    if file_path.endswith('.mp4'):
-        video = VideoFileClip(file_path)
-        audio_path = "temp_audio.wav"
-        video.audio.write_audiofile(audio_path)
-    elif file_path.endswith('.mp3'):
-        audio = AudioSegment.from_mp3(file_path)
-        audio.export("temp_audio.wav", format="wav")
-        audio_path = "temp_audio.wav"
-    else:
-        raise ValueError("Unsupported file format")
-
-    with sr.AudioFile(audio_path) as source:
-        audio_data = recognizer.record(source)
-        transcript = recognizer.recognize_google(audio_data, language="en-US")
-
-    os.remove(audio_path)
-    return transcript
-
-def get_payload(video_transcript, user_query):
-    history = str(json.dumps(load_history()))
-    return {
-        "model": "LLaMA_CPP",
-        "messages": [
-            {
-                "role": "system",
-                "content": prompt_template.format(video_transcript=video_transcript, history=history)
-            },
-            {
-                "role": "user",
-                "content": user_query
-            }
-        ],
-        "stream": False 
-    }
-
-def load_history():
-    with open('history/chat_history.json', 'r') as f:
-        history = json.loads(f.read())
-    return history
-
-def save_history(user_query, ai_response):
-    history = load_history()
-    history.append({"user_query":user_query, "ai_response":ai_response})
-    
-    if len(history) > 5:
-        history = history[1:]
-    
-    with open('history/chat_history.json', 'w') as f:
-        f.write(json.dumps(history))
-     
-@app.route('/youtube', methods=['POST'])
+@app.route('/text_analyzer', methods=['POST'])
 def get_answer():
     data = request.json
-    youtube_url = data.get('youtube_url')
+    media_data = data.get('media_data')
     user_query = data.get('user_query')
-    video_file = request.files.get('video_file')
-    
     if not user_query:
         return jsonify({"error": "User query is required"}), 400
 
-    if youtube_url:
-        loader = YoutubeLoader.from_youtube_url(youtube_url, add_video_info=False)
-        docs = loader.load()
-        video_transcript = docs[0].page_content
-    elif video_file and (video_file.filename.endswith('.mp4') or video_file.filename.endswith('.mp3')):
-        file_path = f"temp_upload.{video_file.filename.split('.')[-1]}"
-        video_file.save(file_path)
-        try:
-            video_transcript = transcribe_audio(file_path)
-        finally:
-            os.remove(file_path)
-    else:
-        return jsonify({"error": "You must provide a YouTube URL or a .mp4/.mp3 file"}), 400
+    text = ''
+    for media in media_data:
+        
+        if media.startswith('https://'):
+            try:
+                video_id = media.partition('watch?v=')[2]
+                loader = YoutubeLoader(video_id)
+                text+=loader.load()[0].page_content
+            except:
+                pass
+        elif media.endswith('.mp3') or media.endswith('.mp4'):
+            try:
+                text+=transcribe_audio_file(media)
+            except:
+                pass
+        elif media.endswith('.doc'):
+            try:
+                text+=extract_text_from_doc(media)
+            except:
+                pass
+        elif media.endswith('.json'):
+            try:
+                text+=extract_text_from_json(media)
+            except:
+                pass
+        elif media.endswith('.pdf'):
+            try:
+                text+=extract_text_from_pdf(media)
+            except:
+                pass
+        elif media.endswith('.ppt'):
+            try:
+                text+=extract_text_from_ppt(media)
+            except:
+                pass
+        elif media.endswith('.xlsx') or media.endswith('.xls'):
+            try:
+                text+=read_excel(media)
+            except:
+                pass
+        elif media.endswith('.csv'):
+            try:
+                text+=read_csv(media)
+            except:
+                pass
+        else:
+            pass
 
-    payload = get_payload(video_transcript, user_query)
-    response = requests.post(LLAMA_API_URL, headers=HEADERS, json=payload)
-    return jsonify({"answer":response.json()['choices'][0]['message']['content']})
+    answer = run_genaitor(video_transcription=text, user_query=user_query)
+    for answer_key in answer['output']['output'][0].keys():
+        answer = answer['output']['output'][-1][answer_key]
+    return jsonify({"answer":answer})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
