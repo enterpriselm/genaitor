@@ -205,7 +205,6 @@ def get_answer():
             pass
     
     text=text.replace('Estimate on the Generalization Error for TPBVP arising from the PMP application to OCP (cont’d)', '')
-    
     answer = run_genaitor(text=text, user_query=user_query)
     for answer_key in answer['output']['output'][0].keys():
         answer = answer['output']['output'][-1][answer_key]
