@@ -12,7 +12,7 @@ agents = {
             "You are an expert in analyzing and extracting relevant information from text. "
             "When given a user's query and a text, identify and return the part of the text that justifies the answer. "
         ),
-        temperature=0.7,
+        temperature=0.1,
         max_tokens=2000,
         max_iterations=1
     ),
@@ -23,8 +23,8 @@ agents = {
             "Given a user's question and the answer extracted from the text, evaluate if the answer makes sense in the context of the question. "
             "Provide a response indicating whether the answer is coherent and why."
         ),
-        temperature=0.6,
-        max_tokens=1500,
+        temperature=0.1,
+        max_tokens=2000,
         max_iterations=1
     ),
     'refiner': Agent(
@@ -33,7 +33,7 @@ agents = {
             "You are an expert in refining and improving text. "
             "Given a question and its initial response, refine the response to make it more precise, coherent, and helpful."
         ),
-        temperature=0.8,
+        temperature=0.1,
         max_tokens=2000,
         max_iterations=1
     )
@@ -51,9 +51,16 @@ class QueryProcessingTasks():
             """,
             agent=agent,
             output_file='extracted_text.txt',
-            goal="""Identify the most relevant part of the provided text that justifies the answer to the user's query.
-            User's Query: {user_query}
-            Input Text: {input_text}"""
+            goal="""Extract the most relevant information from the provided text that directly addresses the user's query. Include specific portions of the text to justify the answer.
+
+                    ### Input:
+                    Text: {input_text}
+                    User Query: {user_query}
+
+                    ### Output Format:
+                    A concise excerpt from the input text that directly justifies the answer to the user's query, in plain text.
+
+            """
         )
 
     def validation_task(self, agent):
@@ -67,9 +74,16 @@ class QueryProcessingTasks():
             """,
             agent=agent,
             output_file='validation_report.txt',
-            goal="""Evaluate the coherence of the extracted answer in the context of the user's query.
-            User's Query: {user_query}
-            Extracted Answer: {extracted_answer}"""
+            goal="""Assess whether the extracted answer aligns with the user's query in terms of logic and context. Provide a rationale for your assessment.
+
+                    ### Input:
+                    User Query: {user_query}
+                    Extracted Answer: {extracted_answer}
+
+                    ### Output Format:
+                    - Validation result: [Yes/No]
+                    - Explanation: [A brief rationale for your assessment]
+"""
         )
 
     def refinement_task(self, agent):
@@ -82,9 +96,15 @@ class QueryProcessingTasks():
             """,
             agent=agent,
             output_file='refined_answer.txt',
-            goal="""Refine the extracted answer to make it more precise and helpful.
-            User's Query: {user_query}
-            Initial Answer: {extracted_answer}"""
+            goal="""Refine the extracted answer to ensure it is precise, coherent, and directly addresses the user's query.
+
+                    ### Input:
+                    Initial Answer: {extracted_answer}
+                    User Query: {user_query}
+
+                    ### Output Format:
+                    The refined answer in plain text.
+            """
         )
 
 def run_genaitor(text, user_query):
@@ -183,7 +203,9 @@ def get_answer():
             text+='\n'
         else:
             pass
-
+    
+    text=text.replace('Estimate on the Generalization Error for TPBVP arising from the PMP application to OCP (cont’d)', '')
+    
     answer = run_genaitor(text=text, user_query=user_query)
     for answer_key in answer['output']['output'][0].keys():
         answer = answer['output']['output'][-1][answer_key]
