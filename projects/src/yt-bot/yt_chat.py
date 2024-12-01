@@ -3,7 +3,7 @@ from langchain_community.document_loaders import YoutubeLoader
 from genaitor.config import config
 from genaitor.utils.agents import Agent, Orchestrator, Task
 from flask_cors import CORS
-from utils import extract_text_from_doc, extract_text_from_json, extract_text_from_pdf, extract_text_from_ppt, read_csv, read_excel, transcribe_audio_file, image_to_text
+from genaitor.utils.utils import extract_text_from_doc, extract_text_from_json, extract_text_from_pdf, extract_text_from_ppt, read_csv, read_excel, transcribe_audio_file, image_to_text
 
 agents = {
     'extractor': Agent(
@@ -128,55 +128,63 @@ def get_answer():
 
     text = ''
     for media in media_data:
-        
         if media.startswith('https://'):
             try:
                 video_id = media.partition('watch?v=')[2]
                 loader = YoutubeLoader(video_id)
                 text+=loader.load()[0].page_content
+                text+='\n'
             except:
                 pass
         elif media.endswith('.mp3') or media.endswith('.mp4'):
             try:
                 text+=transcribe_audio_file(media)
+                text+='\n'
             except:
                 pass
         elif media.endswith('.doc'):
             try:
                 text+=extract_text_from_doc(media)
+                text+='\n'
             except:
                 pass
         elif media.endswith('.json'):
             try:
                 text+=extract_text_from_json(media)
+                text+='\n'
             except:
                 pass
         elif media.endswith('.pdf'):
             try:
                 text+=extract_text_from_pdf(media)
+                text+='\n'
             except:
                 pass
-        elif media.endswith('.ppt'):
+        elif media.endswith('.ppt') or media.endswith('pptx'):
             try:
                 text+=extract_text_from_ppt(media)
+                text+='\n'
             except:
                 pass
         elif media.endswith('.xlsx') or media.endswith('.xls'):
             try:
                 text+=read_excel(media)
+                text+='\n'
             except:
                 pass
         elif media.endswith('.csv'):
             try:
                 text+=read_csv(media)
+                text+='\n'
             except:
                 pass
         elif media.endswith('.jpg') or media.endswith('.jpeg') or media.endswith('.png'):
             text+=image_to_text(media)
+            text+='\n'
         else:
             pass
 
-    answer = run_genaitor(video_transcription=text, user_query=user_query)
+    answer = run_genaitor(text=text, user_query=user_query)
     for answer_key in answer['output']['output'][0].keys():
         answer = answer['output']['output'][-1][answer_key]
     return jsonify({"answer":answer})

@@ -1,5 +1,5 @@
-import base64
-import requests
+from PIL import Image
+import pytesseract
 import os
 import json
 import pdfplumber
@@ -10,7 +10,6 @@ import speech_recognition as sr
 from moviepy.editor import AudioFileClip
 
 from config import config
-
 
 def extract_text_from_pdf(file_path):
     with pdfplumber.open(file_path) as pdf:
@@ -50,22 +49,6 @@ def read_excel(file_path):
     return df.to_string(index=False)
 
 def image_to_text(image_path):
-    with open(image_path, "rb") as image_file:
-        base64_string = base64.b64encode(image_file.read()).decode('utf-8')
-    
-    user_query = f"""What is in this picture?
-        {base64_string}
-        Answer as a text with 1 paragraph"""
-
-    payload = {
-        "model": "LLaMA_CPP",
-        "messages": [
-            {"role": "system", "content": "answer the user request about a base64 image"},
-            {"role": "user", "content": user_query}
-        ],
-        "max_tokens": 2000,
-        "temperature": 0.8
-    }
-    
-    response = requests.post(config.LLAMA_API_URL, headers=config.HEADERS, json=payload)
-    return {"content": response.json()['choices'][0]['message']['content']}
+    # TODO: Add preprocess with FURIO before OCR.
+    image = Image.open(image_path)
+    return pytesseract.image_to_string(image)

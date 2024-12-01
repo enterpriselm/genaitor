@@ -6,3 +6,4 @@ moviepy==1.0.3
 pdfplumber
 python-pptx
 python-docx
+tesseract-ocr
