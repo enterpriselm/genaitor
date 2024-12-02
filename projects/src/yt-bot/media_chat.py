@@ -54,7 +54,7 @@ class QueryProcessingTasks():
             goal="""Extract the most relevant information from the provided text that directly addresses the user's query. Include specific portions of the text to justify the answer.
 
                     ### Input:
-                    Text: {input_text}
+                    Text: {text}
                     User Query: {user_query}
 
                     ### Output Format:
@@ -117,7 +117,7 @@ def run_genaitor(text, user_query):
     ]
 
     orchestrator = Orchestrator(agents=agents, tasks=tasks, process='sequential', cumulative=False)
-    result = orchestrator.kickoff(user_query=user_query, input_text=text)
+    result = orchestrator.kickoff(user_query=user_query, text=text)
 
     tasks = [
         query_processing_tasks.validation_task(
@@ -131,7 +131,10 @@ def run_genaitor(text, user_query):
     for key_answer in result['output']['output'][0].keys():
         extracted_answer = result['output']['output'][0][key_answer]
 
+    print(extracted_answer)
+
     orchestrator = Orchestrator(agents=agents, tasks=tasks, process='sequential', cumulative=False)
+    extracted_answer = str(extracted_answer) if not isinstance(extracted_answer, str) else extracted_answer
     return orchestrator.kickoff(user_query=user_query, extracted_answer=extracted_answer)
 
 
@@ -204,11 +207,11 @@ def get_answer():
         else:
             pass
     
-    text=text.replace('Estimate on the Generalization Error for TPBVP arising from the PMP application to OCP (cont’d)', '')
+    #text=text.replace('Estimate on the Generalization Error for TPBVP arising from the PMP application to OCP (cont’d)', '')
     answer = run_genaitor(text=text, user_query=user_query)
     for answer_key in answer['output']['output'][0].keys():
         answer = answer['output']['output'][-1][answer_key]
     return jsonify({"answer":answer})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)

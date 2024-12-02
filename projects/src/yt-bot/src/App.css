@@ -1,102 +1,148 @@
+/* Base styles */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #1c1c1c; /* Dark grey background */
+  color: #f5f5f5; /* White text for readability */
+  line-height: 1.6;
+}
+
 .App {
   text-align: center;
-  font-family: 'Arial', sans-serif;
-  color: #333; /* Better readability */
-  padding: 20px;
-  background-color: #f9f9f9; /* Subtle background color */
-  min-height: 100vh; /* Ensure it covers the full viewport */
+  padding: 2rem;
+  min-height: 100vh;
 }
 
+/* Headings */
 h1 {
-  font-size: 2rem;
-  color: #0056b3; /* Make the title stand out */
-  margin-bottom: 20px;
+  font-size: 2.5rem;
+  color: #d4af37; /* Gold accent */
+  margin-bottom: 1.5rem;
 }
 
+/* Form container */
 form {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #ffffff; /* Separate form visually */
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  max-width: 600px;
+  background-color: #292929; /* Slightly lighter grey for contrast */
+  border-radius: 0.5rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+  max-width: 40rem;
   margin: 0 auto;
 }
 
+/* Form labels */
 label {
-  width: 100%; /* Align labels with inputs */
-  margin: 10px 0;
+  width: 100%;
+  margin: 0.5rem 0;
   text-align: left;
   font-weight: bold;
+  color: #d4af37; /* Gold text for labels */
 }
 
+/* Form inputs and textarea */
 input,
 textarea {
   width: 100%;
-  max-width: 500px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 0.75rem;
+  border: 1px solid #f5f5f5; /* White border */
+  border-radius: 0.25rem;
   font-size: 1rem;
   box-sizing: border-box;
-  margin-top: 5px;
+  margin-top: 0.25rem;
+  background-color: #1c1c1c; /* Match background */
+  color: #f5f5f5; /* White text */
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #d4af37; /* Gold focus outline */
+  box-shadow: 0 0 4px rgba(212, 175, 55, 0.6);
+  outline: none;
 }
 
 textarea {
-  height: 120px; /* Slightly taller for better usability */
-  resize: vertical; /* Allow vertical resizing */
+  height: 8rem;
+  resize: vertical;
 }
 
+/* Buttons */
 button {
-  margin-top: 15px;
-  background-color: #0056b3;
-  color: #ffffff;
+  margin-top: 1rem;
+  background-color: #d4af37; /* Gold */
+  color: #1c1c1c; /* Dark text for contrast */
   border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
+  border-radius: 0.25rem;
+  padding: 0.75rem 1.5rem;
   font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 button:hover {
-  background-color: #004494; /* Darker shade on hover */
+  background-color: #b38627; /* Darker gold */
+  transform: translateY(-2px);
+}
+
+button:focus {
+  outline: 2px solid #b38627;
 }
 
 button:disabled {
-  background-color: #cccccc;
+  background-color: #444;
+  color: #888;
   cursor: not-allowed;
+  transform: none;
 }
 
+/* Response container */
 .response {
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #ffffff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Subtle shadow for emphasis */
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border: 1px solid #d4af37; /* Gold border */
+  border-radius: 0.5rem;
+  background-color: #292929; /* Match form background */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   width: 90%;
-  max-width: 600px;
+  max-width: 40rem;
   text-align: left;
   word-wrap: break-word;
 }
 
 .response h2 {
   margin-top: 0;
-  font-size: 1.25rem;
-  color: #0056b3; /* Match the app's theme */
+  font-size: 1.5rem;
+  color: #d4af37; /* Gold accent */
 }
 
 .response p {
-  margin: 10px 0;
-  line-height: 1.5; /* Improve text readability */
+  margin: 0.5rem 0;
 }
 
+/* Highlighted text (optional) */
+.response .highlight {
+  color: #ff5c5c; /* Soft red for emphasis */
+  font-weight: bold;
+}
+
+/* Links */
+a {
+  color: #ff5c5c; /* Soft red for links */
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #d94c4c; /* Slightly darker red on hover */
+}
+
+/* Responsive Design */
 @media (max-width: 600px) {
   form {
-    padding: 15px;
+    padding: 1.5rem;
   }
 
   input,
@@ -106,9 +152,10 @@ button:disabled {
 
   button {
     font-size: 0.9rem;
+    padding: 0.6rem 1rem;
   }
 
   .response {
-    padding: 15px;
+    padding: 1rem;
   }
 }

@@ -1,77 +1,129 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import './App.css';
+import React, { useState } from "react";
 
-function App() {
-  const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [userQuery, setUserQuery] = useState('');
-  const [response, setResponse] = useState('');
-  const [loading, setLoading] = useState(false);
+const App = () => {
+    const [files, setFiles] = useState([]);
+    const [paths, setPaths] = useState([]);
+    const [query, setQuery] = useState('');
+    const [apiResponse, setApiResponse] = useState('');
 
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setResponse(''); // Limpa a resposta anterior antes de uma nova chamada
+    const handleFileChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        setFiles(selectedFiles);
+    };
 
-    try {
-      const result = await axios.post(
-        'http://localhost:5000/youtube',
-        { youtube_url: youtubeUrl, user_query: userQuery }, // Payload em JSON
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            // 'X-API-Key': 'your-api-key-here', // Descomente se necessário
-          },
-        }
-      );
-
-      if (result.data && result.data.answer) {
-        setResponse(result.data.answer);
-      } else {
-        setResponse('No answer received from the API.');
-      }
-    } catch (error) {
-      console.error(error);
-      setResponse('Error processing request. Check console for details.');
-    } finally {
-      setLoading(false); // Move o setLoading para o bloco finally para garantir que seja chamado em caso de erro
+    const handleQueryChange = (e) => {
+      setQuery(e.target.value);
     }
-  };
 
-  return (
-    <div className="App">
-      <h1>YT Video AI Helper</h1>
-      <form onSubmit={handleFormSubmit}>
-        <label> YouTube URL:
-          <input
-            type="text"
-            value={youtubeUrl}
-            onChange={(e) => setYoutubeUrl(e.target.value)}
-            placeholder="Enter YouTube URL"
-          />
-        </label>
-        
-        <label> User Query:
-          <textarea
-            value={userQuery}
-            onChange={(e) => setUserQuery(e.target.value)}
-            placeholder="Enter your question about the video"
-          />
-        </label>
-        
-        <button type="submit" disabled={loading}>
-          {loading ? 'Processing...' : 'Get Answer'}
-        </button>
-      </form>
+    const isFileSecure = (file) => {
+        const allowedExtensions = [
+            "pdf", "doc", "docx", "json", "ppt", "pptx",
+            "xls", "xlsx", "csv", "jpg", "jpeg", "png", "mp3", "mp4",
+        ];
+        const extension = file.name.split(".").pop().toLowerCase();
+        return allowedExtensions.includes(extension);
+    };
 
-      <div className="response">
-        <h2>AI Response:</h2>
-        <p>The main topics covered in this machine learning class are unsupervised learning and reinforcement learning.</p>
-        <p>Specifically, the lecturer discusses the concept of unsupervised learning, provides examples of its application in real-world situations, such as the Cocktail Party Problem and separating out voices from a noisy room using microphones, and covers the topic of reinforcement learning.</p>
-        <p> The class also emphasizes the importance of interaction with classmates and asking questions on the Piazza platform to further understand and apply the concepts discussed in the lecture.</p>
-      </div>
-    </div>
-  );
-}
+    const downloadFiles = () => {
+        const validPaths = [];
+        files.forEach((file) => {
+            if (isFileSecure(file)) {
+                const blob = new Blob([file], { type: file.type });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = file.name;
+                link.click();
+                URL.revokeObjectURL(url);
+                validPaths.push('/home/usuario/Downloads/'+file.name); // Simulated path
+            } else {
+                alert(`${file.name} is not secure and will not be downloaded.`);
+            }
+        });
+        setPaths(validPaths);
+    };
+
+    const submitPaths = async () => {
+        if (paths.length === 0) {
+            alert("No valid files to submit.");
+            return;
+        }
+        try {
+            const response = await fetch("http://localhost:5000/text_analyzer", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    media_data: paths,
+                    user_query: query,
+                }),
+            });
+            const data = await response.json();
+            setApiResponse(JSON.stringify(data, null, 2));
+        } catch (error) {
+            console.error("Error submitting paths:", error);
+            setApiResponse("Error connecting to the API.")
+        }
+    };
+
+    return (
+        <div style={{ padding: "20px" }}>
+            <h1>File Upload Interface</h1>
+
+            <input
+                type="text"
+                placeholder="Enter your query"
+                value={query}
+                onChange={handleQueryChange}
+                style={{ display: "block", marginBottom: "10px", width: "100%" }}
+            />
+
+            <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                style={{ display: "block", marginBottom: "20px" }}
+            />
+
+            <button
+                onClick={downloadFiles}
+                style={{ display: "block", marginBottom: "10px", width: "100%" }}
+            >
+                Check & Download
+            </button>
+            <button
+                onClick={submitPaths}
+                style={{ display: "block", width: "100%" }}
+            >
+                Submit to API
+            </button>
+
+            <div style={{ marginTop: "20px" }}>
+                <h3>Uploaded Files:</h3>
+                <ul>
+                    {files.map((file, index) => (
+                        <li key={index}>{file.name}</li>
+                    ))}
+                </ul>
+            </div>
+
+            <div style={{ marginTop: "20px" }}>
+                <h3>Valid Paths:</h3>
+                <ul>
+                    {paths.map((path, index) => (
+                        <li key={index}>{path}</li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Resposta da API */}
+            <div style={{ marginTop: "20px" }}>
+                <h3>API Response:</h3>
+                <p style={{ whiteSpace: "pre-wrap", backgroundColor: "#f0f0f0", padding: "10px", borderRadius: "5px" }}>
+                    {apiResponse || "No response yet."}
+                </p>
+            </div>
+        </div>
+    );
+};
 
 export default App;
