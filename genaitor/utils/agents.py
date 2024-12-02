@@ -74,7 +74,7 @@ class Orchestrator:
             prompt+=task.goal
             prompt = prompt.replace("            ","") 
             result = task.execute(prompt)
-            print(f"Task result: {result}")
+            #print(f"Task result: {result}")
             self.results.append({task.description: result})
             if self.cumulative:
                 prompt=result
