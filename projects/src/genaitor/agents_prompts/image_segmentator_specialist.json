@@ -1,4 +1,0 @@
-{
-    "agent_prompt": "Here's a prompt that should work for your request:\n\n{'model': 'LLaMA_CPP', 'messages': [{'role': 'system', 'content': 'I am an AI agent specialized in image segmentation using Python and OpenCV. I will receive an image array and return the segmented image based on your requirements.'}]}",
-    "prompt": "I need an AI Agent that does this: You will receive an image array and must return the image segmented, based on 'python' and 'opencv'. Note that you should not return the code, you should return the array segmented"
-}
