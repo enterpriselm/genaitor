@@ -104,8 +104,6 @@ class GeminiProvider(LLMProvider):
             # Formatar o prompt como o Gemini espera
             parts = [{"text": prompt}]
             
-            print("\nDEBUG - Request Details:")
-            print(f"API Key: {self.current_key[:15]}...")
             print(f"Model: {self.config.model}")
             print(f"Temperature: {self.config.temperature}")
             print(f"Max Tokens: {self.config.max_tokens}")
@@ -116,22 +114,15 @@ class GeminiProvider(LLMProvider):
                 generation_config=generation_config
             )
             
-            print("\nDEBUG - Response Structure:")
-            print(f"Has candidates: {hasattr(response, 'candidates')}")
             if hasattr(response, 'candidates'):
-                print(f"Number of candidates: {len(response.candidates)}")
                 if response.candidates:
                     candidate = response.candidates[0]
-                    print(f"Candidate content: {candidate.content}")
-                    print(f"Content parts: {candidate.content.parts}")
-                    if candidate.content.parts:
-                        print(f"First part text: {candidate.content.parts[0].text}")
-            
+                    
             # Extrair texto da resposta
             if response and response.candidates:
                 content = response.candidates[0].content.parts[0].text
                 if content:
-                    print("\nDEBUG - Final Content:")
+                    print("\nFinal Content:")
                     print(content[:200] + "..." if len(content) > 200 else content)
                     return content
                     

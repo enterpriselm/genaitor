@@ -1,6 +1,6 @@
 from .base import Task, TaskConfig, TaskResult, AgentRole
 from .agent import Agent
-from .orchestrator import Orchestrator, ExecutionMode
+from .orchestrator import Orchestrator, ExecutionMode, Flow
 
 __all__ = [
     'Task',
@@ -9,5 +9,6 @@ __all__ = [
     'AgentRole',
     'Agent',
     'Orchestrator',
-    'ExecutionMode'
+    'ExecutionMode',
+    'Flow'
 ] 

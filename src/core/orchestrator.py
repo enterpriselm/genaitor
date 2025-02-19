@@ -10,42 +10,62 @@ class ExecutionMode(Enum):
     PARALLEL = "parallel"
     ADAPTIVE = "adaptive"
 
+class Flow:
+    def __init__(self, agents: List[str], context_pass: List[bool]):
+        self.agents = agents  # List of agent names
+        self.context_pass = context_pass  # List of booleans indicating if context should be passed
+
 class Orchestrator:
     def __init__(
         self,
         agents: Dict[str, Agent],
+        flows: Dict[str, Flow],
         mode: ExecutionMode = ExecutionMode.SEQUENTIAL,
         max_workers: int = 5
     ):
         self.agents = agents
+        self.flows = flows
         self.mode = mode
         self.max_workers = max_workers
         self.execution_history: List[Dict[str, Any]] = []
 
-    async def process_request(self, request: str) -> Dict[str, Any]:
-        """Process a request using the configured agents"""
+    async def process_request(self, request: str, flow_name: str) -> Dict[str, Any]:
+        """Process a request using the specified flow"""
         try:
-            if self.mode == ExecutionMode.SEQUENTIAL:
-                results = {}
-                for name, agent in self.agents.items():
-                    result = agent.process_request(request)
-                    results[name] = result
-                return {
-                    "success": True,
-                    "content": results
-                }
-            elif self.mode == ExecutionMode.PARALLEL:
-                return await self._process_parallel(request)
-            elif self.mode == ExecutionMode.ADAPTIVE:
-                return await self._process_adaptive(request)
-            else:
-                return await self._process_sequential(request)
+            flow = self.flows[flow_name]
+            results = {}
+            context = {}
+
+            for i, agent_name in enumerate(flow.agents):
+                agent = self.agents[agent_name]
+                should_pass_context = flow.context_pass[i]
+                result = await self._execute_agent(agent, request, context if should_pass_context else None)
+                results[agent_name] = result
+                if result.success:
+                    context[agent_name] = result.content  # Update context with the agent's response
+
+            return {
+                "success": True,
+                "content": results
+            }
         except Exception as e:
             return {
                 "success": False,
                 "content": None,
                 "error": str(e)
             }
+
+    async def _execute_agent(
+        self,
+        agent: Agent,
+        request: Any,
+        context: Optional[Dict[str, Any]]
+    ) -> TaskResult:
+        """Execute a single agent with context"""
+        try:
+            return agent.process_request(request, context)
+        except Exception as e:
+            return TaskResult(success=False, content=None, error=str(e))
 
     async def _process_sequential(
         self,
@@ -105,18 +125,6 @@ class Orchestrator:
         # Implement adaptive logic based on request complexity,
         # agent dependencies, and system load
         pass
-
-    async def _execute_agent(
-        self,
-        agent: Agent,
-        request: Any,
-        context: Dict[str, Any]
-    ) -> TaskResult:
-        """Execute a single agent with context"""
-        try:
-            return agent.process_request(request)
-        except Exception as e:
-            return TaskResult(success=False, content=None, error=str(e))
 
     def _combine_results(self, results: List[TaskResult]) -> TaskResult:
         """Combine multiple results into a single result"""

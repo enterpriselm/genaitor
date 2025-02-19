@@ -1,0 +1,7 @@
+# Requirements for Training and Inference
+
+numpy==1.23.1
+torch==1.12.1
+torchvision==0.13.1
+tensorboard==2.10.0
+The provided context does not mention anything about requirements for cloud integration (Azure, GCP, AWS). Therefore, I cannot extract the requested data from the provided context.

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration of Providers, Agents, and Tasks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 200px;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-right: 1px solid #ccc;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        .tab {
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 5px;
+            background-color: #e7e7e7;
+        }
+        .tab.active {
+            background-color: #d7d7d7;
+        }
+        .hidden {
+            display: none;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <div class="sidebar">
+        <div class="tab active" onclick="showTab('providers')">Providers</div>
+        <div class="tab" onclick="showTab('agents')">Agents</div>
+        <div class="tab" onclick="showTab('tasks')">Tasks</div>
+    </div>
+
+    <div class="content">
+        <div id="providers" class="tab-content">
+            <h2>Providers</h2>
+            <div class="form-group">
+                <label for="provider-select">Select Provider:</label>
+                <select id="provider-select" onchange="updateModelOptions()">
+                    <option value="">--Select--</option>
+                    <option value="anthropic">Anthropic</option>
+                    <option value="deepseek">DeepSeek</option>
+                    <option value="custom">Custom</option>
+                    <option value="google">Google</option>
+                    <option value="ollama">Ollama</option>
+                    <option value="openai">OpenAI</option>
+                </select>
+            </div>
+
+            <div id="model-container" class="hidden">
+                <div class="form-group">
+                    <label for="model-select">Model:</label>
+                    <select id="model-select"></select>
+                </div>
+                <div id="api-fields"></div>
+            </div>
+        </div>
+
+        <div id="agents" class="tab-content hidden">
+            <h2>Agents</h2>
+            <p>Content for Agents.</p>
+        </div>
+
+        <div id="tasks" class="tab-content hidden">
+            <h2>Tasks</h2>
+            <p>Content for Tasks.</p>
+        </div>
+    </div>
+
+<script>
+    function showTab(tabName) {
+        const tabs = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => {
+            tab.classList.add('hidden');
+        });
+        document.getElementById(tabName).classList.remove('hidden');
+
+        // Reset provider selection when switching tabs
+        if (tabName === 'providers') {
+            document.getElementById('provider-select').selectedIndex = 0;
+            document.getElementById('model-container').classList.add('hidden');
+            document.getElementById('api-fields').innerHTML = '';
+        }
+    }
+
+    function updateModelOptions() {
+        const provider = document.getElementById('provider-select').value;
+        const modelSelect = document.getElementById('model-select');
+        const apiFields = document.getElementById('api-fields');
+        modelSelect.innerHTML = '';
+        apiFields.innerHTML = '';
+
+        if (provider) {
+            let models = [];
+            switch (provider) {
+                case 'anthropic':
+                    models.push('claude-3-opus-20240229');
+                    apiFields.innerHTML = `
+                        <div class="form-group">
+                            <label for="api_key">API Key:</label>
+                            <input type="text" id="api_key" placeholder="Enter your API Key">
+                        </div>
+                    `;
+                    break;
+                case 'deepseek':
+                    apiFields.innerHTML = `
+                        <div class="form-group">
+                            <label for="api_key">API Key:</label>
+                            <input type="text" id="api_key" placeholder="Enter your API Key">
+                        </div>
+                        <div class="form-group">
+                            <label for="base_url">Base URL:</label>
+                            <input type="text" id="base_url" placeholder="Enter the Base URL">
+                        </div>
+                    `;
+                    break;
+                case 'custom':
+                    apiFields.innerHTML = `
+                        <div class="form-group">
+                            <label for="custom_url">API URL:</label>
+                            <input type="text" id="custom_url" placeholder="Enter the API URL">
+                        </div>
+                    `;
+                    break;
+                case 'google':
+                    models.push('gemini-pro');
+                    apiFields.innerHTML = `
+                        <div class="form-group">
+                            <label for="api_key">API Key:</label>
+                            <input type="text" id="api_key" placeholder="Enter your API Key">
+                        </div>
+                    `;
+                    break;
+                case 'ollama':
+                    models.push('llama3.2');
+                    apiFields.innerHTML = `
+                        <div class="form-group">
+                            <label for="base_url">Base URL:</label>
+                            <input type="text" id="base_url" placeholder="Enter the Base URL">
+                        </div>
+                    `;
+                    break;
+                case 'openai':
+                    models.push('gpt-4');
+                    apiFields.innerHTML = `
+                        <div class="form-group">
+                            <label for="api_key">API Key:</label>
+                            <input type="text" id="api_key" placeholder="Enter your API Key">
+                        </div>
+                        <div class="form-group">
+                            <label for="organization">Organization (optional):</label>
+                            <input type="text" id="organization" placeholder="Enter your Organization">
+                        </div>
+                    `;
+                    break;
+            }
+
+            models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                modelSelect.appendChild(option);
+            });
+
+            document.getElementById('model-container').classList.remove('hidden');
+        } else {
+            document.getElementById('model-container').classList.add('hidden');
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -8,9 +8,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.core import (
     Agent, Task, Orchestrator, TaskResult,
-    ExecutionMode, AgentRole
+    ExecutionMode, AgentRole, Flow
 )
 from src.llm import GeminiProvider, GeminiConfig
+from preset_agents.preset_components import create_agents, create_flows  # Updated import
 
 # Define custom task for generating training code
 class TrainingCodeTask(Task):
@@ -25,14 +26,15 @@ class TrainingCodeTask(Task):
         
         Input Data: {input_data}
         
-        Based on the provided information, you need to understand the complete physical system used. 
-        Don't worry about the difficulty of development and processing; I need the system to be as realistic as possible to describe the problem requested by the user.
+        Based on the provided information, construct a robust and scalable Python code snippet to train a Physics-Informed Neural Network (PINN). 
+        Ensure the code includes:
+        - Best practices for model training and scientific machine learning
+        - Integration with cloud services (Azure, GCP, AWS) for scalability
+        - Error handling and logging mechanisms
+        - Comments explaining each section of the code
         
-        From the equations provided, construct the best architecture, the best loss function, 
-        and create a function to generate artificial data using functions like Sobol to add noise if necessary 
-        and to obtain the most realistic data possible.
-        
-        Please provide a Python code snippet to train the model based on the provided information, including the governing equations.
+        Please provide a Python code snippet to train the model based on the provided information, including the governing equations well defined.
+        Also, create and fill all the functions and code, don't let anything open for the user.
         {self.output_format}
         """
         
@@ -53,6 +55,32 @@ class TrainingCodeTask(Task):
 async def main():
     colorama.init(autoreset=True)
     print(Fore.GREEN + "\nWelcome to the PINNeAPLE application!\n\n================================\n\n")
+
+    # Initialize the LLM provider
+    test_keys = [
+        "AIzaSyCoC6voLEtOEOg5caWaqEIXBh8CiYWoUaY",
+        "AIzaSyDA3r3LpI8cIGm4AVoaDQ65mDMD10GNTVM"
+    ]
+    
+    gemini_config = GeminiConfig(
+        api_keys=test_keys,
+        temperature=0.7,
+        verbose=False,
+        max_tokens=2000
+    )
+    
+    provider = GeminiProvider(gemini_config)
+
+    # Create agents and flows
+    agents = create_agents(provider)
+    flows = create_flows()
+
+    # Example usage of orchestrator
+    orchestrator = Orchestrator(
+        agents=agents,
+        flows=flows,
+        mode=ExecutionMode.SEQUENTIAL
+    )
 
     # Ask if the user wants to solve a problem forward or inverse
     problem_type = input(Fore.YELLOW + "Do you want to solve a problem in a forward or inverse manner? (Type 'forward' or 'inverse'): \n").strip().lower()
@@ -161,11 +189,14 @@ async def generate_training_code(input_data):
     
     orchestrator = Orchestrator(
         agents={"gemini": agent},
+        flows={
+            "default_flow": Flow(agents=["gemini"], context_pass=[True])  # Define a flow if needed
+        },
         mode=ExecutionMode.SEQUENTIAL
     )
     
     # Process the input data to generate training code
-    result = await orchestrator.process_request(input_data)
+    result = await orchestrator.process_request(input_data, flow_name="default_flow")  # Pass flow name if defined
     
     if result["success"]:
         if isinstance(result["content"], dict):
@@ -175,34 +206,43 @@ async def generate_training_code(input_data):
                 print(Fore.GREEN + "\nTraining code generated successfully.\n")
                 
                 # Save the training code to a .py file
-                with open("examples/results/training_code.py", "w") as f:
+                with open("examples/results/training_code.py", "w", encoding="utf-8") as f:
                     f.write(training_code)
                 print(Fore.YELLOW + "Training code saved as 'training_code.py'.\n")
 
-                # Gerar o código de inferência usando o código de treinamento
+                # Generate the inference code using the training code
                 inference_code = generate_inference_code(provider)
                 print(Fore.GREEN + "\nInference code generated successfully.\n")
                 
-                # Salvar o código de inferência em um arquivo
-                with open("examples/results/inference_code.py", "w") as f:
+                # Save the inference code to a file
+                with open("examples/results/inference_code.py", "w", encoding="utf-8") as f:
                     f.write(inference_code.replace("```python", "").replace("```", ""))
                 print(Fore.YELLOW + "Inference code saved as 'inference_code.py'.\n")
 
-                # Gerar o código de visualização usando o código de treinamento e inferência
+                # Generate the visualization code using the training and inference code
                 visualization_code = generate_visualization_code(provider)
                 print(Fore.GREEN + "\nVisualization code generated successfully.\n")
 
-                # Salvar o código de visualização em um arquivo
-                with open("examples/results/visualization_code.py", "w") as f:
+                # Save the visualization code to a file
+                with open("examples/results/visualization_code.py", "w", encoding="utf-8") as f:
                     f.write(visualization_code.replace("```python", "").replace("```", ""))
                 print(Fore.YELLOW + "Visualization code saved as 'visualization_code.py'.\n")
 
-                # Gerar o README usando o LLM com todas as informações
+                # Generate the requirements for the project
+                requirements_file = generate_requirements(provider)
+                print(Fore.GREEN + "\nRequirements generated successfully.\n")
+
+                # Save the requirements to a file
+                with open("examples/results/requirements.txt", "w", encoding="utf-8") as f:
+                    f.write(requirements_file)
+                print(Fore.YELLOW + "Requirements saved as 'requirements.txt'.\n")
+
+                # Generate the README using the LLM with all the information
                 readme_content = generate_readme(input_data, provider)
                 print(Fore.GREEN + "\nREADME generated successfully.\n")
                 
-                # Salvar o README gerado
-                with open("examples/results/README.md", "w") as f:
+                # Save the README generated
+                with open("examples/results/README.md", "w", encoding="utf-8") as f:
                     f.write(readme_content)
                 print(Fore.YELLOW + "README file created as 'README.md'.\n")
 
@@ -228,18 +268,32 @@ def generate_inference_code(llm_provider) -> str:
     - Preparing input data for inference
     - Running inference
     - Printing or returning the output
+    - Integration with cloud services (Azure, GCP, AWS) for deployment
+    - Error handling and logging mechanisms
+    - Generate data for compare, using the equations supplied before and the boundary conditions.
+
+    The code should be concize, scalable and clean.
+    Also, fill all the functions and parts of code, following scientific machine learning and development patterns.
+    Don't let anything open.
+
     """
 
     try:
         response = llm_provider.generate(prompt)
-        return response.text
+        return response.replace('Inference Code:\n\n','')
     except Exception as e:
         print(f"Error generating inference code: {str(e)}")
         return "Error generating inference code."
 
-def generate_visualization_code(training_code: str, inference_code: str, llm_provider) -> str:
+def generate_visualization_code(llm_provider) -> str:
+    with open("examples/results/training_code.py", 'r') as f:
+        training_code = f.read()
+    
+    with open("examples/results/inference_code.py", 'r') as f:
+        inference_code = f.read()
+    
     prompt = f"""
-    Based on the following training code and inference code, generate the visualization code to visualize the results of the trained model:
+    Based on the following training code and inference code, generate the best visualization code to visualize the results of the trained physics informed neural network model:
 
     Training Code:
     {training_code}
@@ -250,17 +304,67 @@ def generate_visualization_code(training_code: str, inference_code: str, llm_pro
     The visualization code should include:
     - Loading the results from the inference
     - Creating visualizations (e.g., plots, graphs)
-    - Displaying or saving the visualizations
+    - Generate data for compare, using the equations supplied before and the boundary conditions.
+    - Instructions for displaying or saving the visualizations
+    - Instructions for Best practices for visualization in a production environment
+    
     """
 
     try:
         response = llm_provider.generate(prompt)
-        return response.text
+        return response.replace('```python','').replace('```','')
     except Exception as e:
         print(f"Error generating visualization code: {str(e)}")
         return "Error generating visualization code."
 
-def generate_readme(input_data: str, training_code: str, inference_code: str, visualization_code: str, llm_provider) -> str:
+def generate_requirements(llm_provider) -> str:
+    with open("examples/results/training_code.py", 'r') as f:
+        training_code = f.read()
+    
+    with open("examples/results/inference_code.py", 'r') as f:
+        inference_code = f.read()
+    
+    with open("examples/results/visualization_code.py", 'r') as f:
+        visualization_code = f.read()
+
+    prompt = f"""
+    Generate a requirements.txt content based on the following information:
+
+    Training Code:
+    {training_code}
+
+    Inference Code:
+    {inference_code}
+
+    Visualization Code:
+    {visualization_code}
+
+    The requirements should include:
+    - All necessary libraries for training, inference, and visualization
+    - Versions of the libraries for compatibility
+    - Any additional dependencies for cloud integration (Azure, GCP, AWS)
+    """
+
+    try:
+        response = llm_provider.generate(prompt)
+        return response.replace('```','').replace('\nrequirements.txt\n','')
+    except Exception as e:
+        print(f"Error generating requirements: {str(e)}")
+        return "Error generating requirements."
+
+def generate_readme(input_data: str, llm_provider) -> str:
+    with open("examples/results/training_code.py", 'r') as f:
+        training_code = f.read()
+    
+    with open("examples/results/inference_code.py", 'r') as f:
+        inference_code = f.read()
+    
+    with open("examples/results/visualization_code.py", 'r') as f:
+        visualization_code = f.read()
+
+    with open("examples/results/requirements.txt", 'r') as f:
+        requirements_file = f.read()
+
     prompt = f"""
     Generate a README file based on the following information:
 
@@ -276,11 +380,20 @@ def generate_readme(input_data: str, training_code: str, inference_code: str, vi
     Visualization Code:
     {visualization_code}
 
+    Requirements:
+    {requirements_file}
+
     The README should include:
     - A clear problem description
+    - Theoretycal physical and/or math explanation about the problem
     - Instructions on how to run the training code
     - Instructions on how to run the inference code
     - Instructions on how to run the visualization code
+    - Instructions on how to setup and run the whole project
+    - Real life applications to it
+    - Best practices for deploying the model in a production environment
+    - Integration with cloud services (Azure, GCP, AWS)
+    
     """
 
     try:

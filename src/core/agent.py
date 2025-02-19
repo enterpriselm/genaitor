@@ -29,21 +29,39 @@ class Agent:
         except Exception as e:
             return TaskResult(success=False, content=None, error=str(e))
 
-    def process_request(self, request: Any) -> TaskResult:
-        """Process a request through all tasks"""
+    def process_request(self, request: Any, context: Optional[Dict[str, Any]] = None) -> TaskResult:
+        """Process a request through all tasks, optionally using context"""
+        # If context is provided, you can modify the request or use it in some way
+        if context:
+            # Example: Modify the request based on context
+            request = self._integrate_context(request, context)
+
         for task in self.tasks:
             result = task.execute(request)
             if not result.success:
                 return result
                 
-            # Atualiza o histórico
+            # Update task history
             self.task_history.append({
                 "task": task.__class__.__name__,
                 "input": request,
                 "output": result
             })
             
-            return result  # Retorna o resultado do primeiro task por enquanto
+            return result  # Return the result of the first task for now
+
+    def _integrate_context(self, request: Any, context: Dict[str, Any]) -> Any:
+        """Integrate context into the request (custom logic can be added here)"""
+        # Example logic to modify the request based on context
+        if isinstance(request, dict) and isinstance(context, dict):
+            # Merge context into the request dictionary
+            request.update(context)
+        elif isinstance(request, str):
+            # If the request is a string, append context information
+            context_info = " ".join(f"{key}: {value}" for key, value in context.items())
+            request = f"{request} | Context: {context_info}"
+        
+        return request  # Return the modified request
 
     def _update_conversation_history(self, request: Any, result: TaskResult) -> None:
         """Update the conversation history"""

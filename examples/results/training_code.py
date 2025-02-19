@@ -1,105 +1,95 @@
 
-import tensorflow as tf
 import numpy as np
+import torch
+from torch import nn
+from torch.optim import Adam
+from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
-# Define the governing equations
-def governing_equations(u, v, w, p, t):
-  """
-  Governing equations for the flow around an airfoil.
+# Governing equations
+def governing_equations(u, v, w, p, T, t, x, y, z):
+    # Momentum equations
+    du_dt = - (u * u_x + v * u_y + w * u_z) + (p_x - (mu/rho) * (u_xx + u_yy + u_zz))
+    dv_dt = - (u * v_x + v * v_y + w * v_z) + (p_y - (mu/rho) * (v_xx + v_yy + v_zz))
+    dw_dt = - (u * w_x + v * w_y + w * w_z) + (p_z - (mu/rho) * (w_xx + w_yy + w_zz))
 
-  Args:
-    u: Velocity in the x-direction.
-    v: Velocity in the y-direction.
-    w: Velocity in the z-direction.
-    p: Pressure.
-    t: Time.
+    # Continuity equation
+    div_u = u_x + v_y + w_z
 
-  Returns:
-    A tensor representing the governing equations.
-  """
+    # Energy equation
+    dT_dt = - (u * T_x + v * T_y + w * T_z) + (k/rho*cp) * (T_xx + T_yy + T_zz)
 
-  # Continuity equation
-  continuity = tf.math.reduce_sum(tf.gradients(u, t) + tf.gradients(v, t) + tf.gradients(w, t), axis=0)
+    return du_dt, dv_dt, dw_dt, div_u, dT_dt
 
-  # Momentum equations
-  x_momentum = tf.math.reduce_sum(tf.gradients(u, t) + u * tf.gradients(u, x) + v * tf.gradients(u, y) + w * tf.gradients(u, z) - (1 / tf.math.sqrt(tf.math.pow(u, 2) + tf.math.pow(v, 2) + tf.math.pow(w, 2))) * tf.gradients(p, x), axis=0)
-  y_momentum = tf.math.reduce_sum(tf.gradients(v, t) + u * tf.gradients(v, x) + v * tf.gradients(v, y) + w * tf.gradients(v, z) - (1 / tf.math.sqrt(tf.math.pow(u, 2) + tf.math.pow(v, 2) + tf.math.pow(w, 2))) * tf.gradients(p, y), axis=0)
-  z_momentum = tf.math.reduce_sum(tf.gradients(w, t) + u * tf.gradients(w, x) + v * tf.gradients(w, y) + w * tf.gradients(w, z) - (1 / tf.math.sqrt(tf.math.pow(u, 2) + tf.math.pow(v, 2) + tf.math.pow(w, 2))) * tf.gradients(p, z), axis=0)
+# Define the neural network
+class PINN(nn.Module):
+    def __init__(self):
+        super(PINN, self).__init__()
+        self.fc1 = nn.Linear(3, 128)
+        self.fc2 = nn.Linear(128, 128)
+        self.fc3 = nn.Linear(128, 5)
 
-  # Energy equation
-  energy = tf.math.reduce_sum(tf.gradients(p, t) + u * tf.gradients(p, x) + v * tf.gradients(p, y) + w * tf.gradients(p, z) - (tf.math.pow(u, 2) + tf.math.pow(v, 2) + tf.math.pow(w, 2)) / tf.math.sqrt(tf.math.pow(u, 2) + tf.math.pow(v, 2) + tf.math.pow(w, 2))), axis=0)
-
-  return continuity, x_momentum, y_momentum, z_momentum, energy
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))
+        x = torch.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
 
 # Define the loss function
-def loss_function(u, v, w, p, t, u_target, v_target, w_target, p_target):
-  """
-  Loss function for the PINN.
+def loss_function(u, v, w, p, T, t, x, y, z):
+    # Residuals of the governing equations
+    du_dt, dv_dt, dw_dt, div_u, dT_dt = governing_equations(u, v, w, p, T, t, x, y, z)
+    residuals = torch.stack([du_dt, dv_dt, dw_dt, div_u, dT_dt])
 
-  Args:
-    u: Predicted velocity in the x-direction.
-    v: Predicted velocity in the y-direction.
-    w: Predicted velocity in the z-direction.
-    p: Predicted pressure.
-    t: Time.
-    u_target: Target velocity in the x-direction.
-    v_target: Target velocity in the y-direction.
-    w_target: Target velocity in the z-direction.
-    p_target: Target pressure.
+    # Boundary conditions
+    u_bc = torch.zeros(u.shape)  # Zero Dirichlet boundary condition for u
+    v_bc = torch.zeros(v.shape)  # Zero Dirichlet boundary condition for v
+    w_bc = torch.zeros(w.shape)  # Zero Dirichlet boundary condition for w
+    p_bc = torch.zeros(p.shape)  # Zero Dirichlet boundary condition for p
+    T_bc = torch.zeros(T.shape)  # Zero Dirichlet boundary condition for T
 
-  Returns:
-    A tensor representing the loss function.
-  """
+    # Loss function
+    loss = torch.mean(residuals**2) + torch.mean(u_bc**2) + torch.mean(v_bc**2) + torch.mean(w_bc**2) + torch.mean(p_bc**2) + torch.mean(T_bc**2)
+    return loss
 
-  # Mean squared error between the predicted and target values
-  mse = tf.math.reduce_mean(tf.math.square(u - u_target) + tf.math.square(v - v_target) + tf.math.square(w - w_target) + tf.math.square(p - p_target))
+# Define the training loop
+def train(model, train_loader, optimizer, num_epochs):
+    # Initialize the tensorboard writer
+    writer = SummaryWriter()
 
-  # Add regularization term to prevent overfitting
-  regularization = tf.math.reduce_sum(tf.math.square(tf.gradients(u, t)) + tf.math.square(tf.gradients(v, t)) + tf.math.square(tf.gradients(w, t)) + tf.math.square(tf.gradients(p, t)))
+    # Train the model for the specified number of epochs
+    for epoch in range(num_epochs):
+        for i, data in enumerate(train_loader):
+            # Get the input data
+            t, x, y, z = data
 
-  return mse + regularization
+            # Forward pass
+            u, v, w, p, T = model(torch.cat([t, x, y, z], dim=1))
 
-# Define the data generation function
-def generate_data(num_points):
-  """
-  Generates artificial data for the PINN.
+            # Calculate the loss
+            loss = loss_function(u, v, w, p, T, t, x, y, z)
 
-  Args:
-    num_points: The number of data points to generate.
+            # Backward pass
+            optimizer.zero_grad()
+            loss.backward()
 
-  Returns:
-    A tuple containing the input data and the target data.
-  """
+            # Update the weights
+            optimizer.step()
 
-  # Generate random input data
-  x = np.random.uniform(-1, 1, num_points)
-  y = np.random.uniform(-1, 1, num_points)
-  z = np.random.uniform(-1, 1, num_points)
-  t = np.random.uniform(0, 1, num_points)
+            # Log the loss
+            writer.add_scalar('Loss/train', loss, epoch)
 
-  # Generate target data by solving the governing equations
-  u_target, v_target, w_target, p_target = governing_equations(x, y, z, t)
+# Define the main function
+if __name__ == '__main__':
+    # Create the model
+    model = PINN()
 
-  return (x, y, z, t), (u_target, v_target, w_target, p_target)
+    # Create the optimizer
+    optimizer = Adam(model.parameters(), lr=1e-3)
 
-# Train the PINN
-num_epochs = 10000
-batch_size = 128
-learning_rate = 0.001
+    # Create the data loader
+    train_data = ...  # Replace this with your own data loader
+    train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
 
-# Generate training data
-(x_train, y_train, z_train, t_train), (u_train, v_train, w_train, p_train) = generate_data(10000)
-
-# Create the PINN model
-model = tf.keras.Sequential([
-  tf.keras.layers.Dense(1024, activation='relu'),
-  tf.keras.layers.Dense(1024, activation='relu'),
-  tf.keras.layers.Dense(1024, activation='relu'),
-  tf.keras.layers.Dense(4)
-])
-
-# Compile the model
-model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate), loss=loss_function)
-
-# Train the model
-model.fit((x_train, y_train, z_train, t_train), (u_train, v_train, w_train, p_train), epochs=num_epochs, batch_size=batch_size)
+    # Train the model
+    train(model, train_loader, optimizer, num_epochs=100)
