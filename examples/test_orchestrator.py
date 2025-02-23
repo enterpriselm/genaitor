@@ -1,5 +1,5 @@
 import pytest
-from src.core import Agent, Task, Orchestrator, TaskResult, ExecutionMode
+from src.core import Agent, Task, Orchestrator, TaskResult, ExecutionMode, Flow
 from src.llm import GeminiProvider, GeminiConfig
 
 # Mock Task class for testing

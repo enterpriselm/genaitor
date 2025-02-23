@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
 import asyncio
-from core import Agent, Task, Orchestrator, TaskResult, ExecutionMode
+from core import Agent, Task, Orchestrator, TaskResult, ExecutionMode, Flow
 from llm import GeminiProvider, GeminiConfig
 
 # Define a mock task for testing
@@ -26,6 +26,9 @@ async def main():
     # Setup orchestrator with sequential processing
     orchestrator = Orchestrator(
         agents={"agent1": agent1, "agent2": agent2},
+            flows={
+            "default_flow": Flow(agents=["gemini"], context_pass=[True])
+        },
         mode=ExecutionMode.SEQUENTIAL
     )
 
@@ -33,7 +36,7 @@ async def main():
     initial_input = "Initial data for processing."
 
     # Process the request
-    result = await orchestrator.process_request(initial_input)
+    result = await orchestrator.process_request(initial_input, flow_name='default_flow')
 
     # Check the results
     assert result["success"] is True, "The orchestrator should succeed."

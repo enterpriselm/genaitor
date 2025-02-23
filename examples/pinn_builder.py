@@ -4,10 +4,12 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.core import (
-    Agent, Task, Orchestrator, TaskResult,
+    Agent, Task, Orchestrator, TaskResult, Flow,
     ExecutionMode, AgentRole
 )
 from src.llm import GeminiProvider, GeminiConfig
+from dotenv import load_dotenv
+load_dotenv('.env')
 
 # Define custom task
 class PinnTask(Task):
@@ -42,24 +44,17 @@ class PinnTask(Task):
 
 async def main():
     print("\nInitializing PINN Builder...")
-
-    # Configurar Gemini com múltiplas chaves
-    test_keys = [
-        "AIzaSyCoC6voLEtOEOg5caWaqEIXBh8CiYWoUaY",
-        "AIzaSyDA3r3LpI8cIGm4AVoaDQ65mDMD10GNTVM"
-    ]
+    test_keys = [os.getenv('API_KEY_1'),os.getenv('API_KEY_2')]
     
-    # Configurar Gemini com limite de tokens
     gemini_config = GeminiConfig(
         api_keys=test_keys,
         temperature=0.7,
         verbose=False,
-        max_tokens=2000  # Limite de tokens por request
+        max_tokens=2000
     )
     
     provider = GeminiProvider(gemini_config)
     
-    # Criar agent
     pinn_task = PinnTask(
         description="Build a Physics-Informed Neural Network (PINN) based on input data.",
         goal="Provide accurate and helpful PINN configurations.",
@@ -73,13 +68,14 @@ async def main():
         llm_provider=provider
     )
     
-    # Setup orchestrator
     orchestrator = Orchestrator(
         agents={"gemini": agent},
+        flows={
+            "default_flow": Flow(agents=["gemini"], context_pass=[True])
+        },
         mode=ExecutionMode.SEQUENTIAL
     )
     
-    # Test com dados de PINN
     input_data_examples = [
         {
             "description": "Solve the 2D steady-state heat equation in a square plate.",
@@ -125,7 +121,6 @@ async def main():
         }
     ]
     
-    # Process each input
     for example in input_data_examples:
         input_data = f"""
         Problem Description: {example['description']}
@@ -138,7 +133,7 @@ async def main():
         print("=" * 80)
         
         try:
-            result = await orchestrator.process_request(input_data)
+            result = await orchestrator.process_request(input_data, flow_name='default_flow')
             
             if result["success"]:
                 if isinstance(result["content"], dict):
@@ -160,5 +155,4 @@ async def main():
             break
 
 if __name__ == "__main__":
-    print("\nStarting PINN Builder...") 
     asyncio.run(main()) 
