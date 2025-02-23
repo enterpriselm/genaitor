@@ -1,43 +1,79 @@
-# Aerodynamics PINN Model
+# Genaitor
 
-## Problem Description
+Genaitor is a framework for building AI agents that can perform various tasks using generative models.
 
-This project aims to develop a Physics-Informed Neural Network (PINN) model for simulating aerodynamic forces on an airplane. The model will incorporate governing equations for fluid dynamics, allowing us to predict the flow of air around the aircraft under varying conditions.
+## Installation
 
-### Geometry
+To install the required dependencies, follow these steps:
 
-The geometry of the airplane is a simplified Boeing-style model with different geometries for different parts of the aircraft.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/genaitor.git
+   cd genaitor
+   ```
 
-### Boundary Conditions
+2. Create a virtual environment (optional but recommended):
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
 
-The boundary conditions for the simulation include a time range of 0 to 10 seconds and the geometry of the airplane.
+3. Install the required packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### Governing Equations
+## Usage
 
-The governing equations used in the model are the continuity equation, momentum equations, and energy equation.
+### Basic Example
 
-### Framework
+Here’s a simple example of how to create an agent that answers questions using a generative model:
 
-The model is implemented using TensorFlow.
+```python
+from src.core import Agent, Task
+from src.llm import GeminiProvider, GeminiConfig
 
-## Training Code
+# Define a custom task
+class QuestionAnsweringTask(Task):
+    def __init__(self, description: str, goal: str, output_format: str, llm_provider):
+        super().__init__(description, goal, output_format)
+        self.llm = llm_provider
 
-To train the PINN model, follow these steps:
+    def execute(self, input_data: str):
+        prompt = f"""
+        Task: {self.description}
+        Goal: {self.goal}
+        Question: {input_data}
+        Please provide a response following the format:
+        {self.output_format}
+        """
+        return self.llm.generate(prompt)
 
-1. Install TensorFlow and other required libraries.
-2. Clone this repository and navigate to the project directory.
-3. Run the following command:
+# Configure the LLM provider
+llm_provider = GeminiProvider(GeminiConfig(api_key="your_api_key"))
 
+# Create an agent
+agent = Agent(name="QA Agent", task=QuestionAnsweringTask("Answering questions", "Provide accurate answers", "Text format", llm_provider))
+
+# Execute a task
+result = agent.task.execute("What is AI?")
+print(result)
 ```
-python train.py
-```
 
-This will generate training data, train the model, and save the trained model as `model.h5`.
+## Contribution Guidelines
 
-## Inference Code
+We welcome contributions! To contribute:
 
-Instructions for generating inference code will be provided after the training code is complete.
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-name`).
+3. Make your changes and commit (`git commit -m 'Add new feature'`).
+4. Push to the branch (`git push origin feature-name`).
+5. Create a pull request.
 
-## Visualization Code
+## License
 
-Instructions for generating visualization code will be provided after the inference code is complete.
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contact
+
+For any questions or suggestions, feel free to open an issue or contact the maintainers at [your-email@example.com].

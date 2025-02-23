@@ -1,6 +1,10 @@
+import logging  # Added logging
 from typing import Any, Dict, List, Optional, Union
 from .base import Task, TaskResult, AgentRole
 from ..llm import LLMProvider
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 class Agent:
     def __init__(
@@ -20,6 +24,7 @@ class Agent:
     def execute_task(self, task: Task, input_data: Any) -> TaskResult:
         """Execute a single task"""
         try:
+            logging.info(f"Executing task: {task.description}")
             result = task.execute(input_data)
             if task.config.validation_required:
                 is_valid = task.validate_result(result)
@@ -27,21 +32,19 @@ class Agent:
                     raise ValueError("Task result validation failed")
             return result
         except Exception as e:
-            return TaskResult(success=False, content=None, error=str(e))
+            logging.error(f"Error executing task '{task.description}': {str(e)}")  # Log the error
+            return TaskResult(success=False, content=None, error=f"Error executing task '{task.description}': {str(e)}")
 
-    def process_request(self, request: Any, context: Optional[Dict[str, Any]] = None) -> TaskResult:
+    async def process_request(self, request: Any, context: Optional[Dict[str, Any]] = None) -> TaskResult:
         """Process a request through all tasks, optionally using context"""
-        # If context is provided, you can modify the request or use it in some way
         if context:
-            # Example: Modify the request based on context
             request = self._integrate_context(request, context)
 
         for task in self.tasks:
-            result = task.execute(request)
+            result = self.execute_task(task, request)
             if not result.success:
                 return result
                 
-            # Update task history
             self.task_history.append({
                 "task": task.__class__.__name__,
                 "input": request,

@@ -4,6 +4,10 @@ from .agent import Agent
 from enum import Enum
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import logging  # Added logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 class ExecutionMode(Enum):
     SEQUENTIAL = "sequential"
@@ -48,11 +52,19 @@ class Orchestrator:
                 "success": True,
                 "content": results
             }
-        except Exception as e:
+        except KeyError as e:
+            logging.error(f"Flow '{flow_name}' not found: {str(e)}")  # Log specific error
             return {
                 "success": False,
                 "content": None,
-                "error": str(e)
+                "error": f"Flow '{flow_name}' not found."
+            }
+        except Exception as e:
+            logging.error(f"Error processing request: {str(e)}")  # Log the error
+            return {
+                "success": False,
+                "content": None,
+                "error": f"An error occurred while processing the request: {str(e)}"
             }
 
     async def _execute_agent(
@@ -63,9 +75,10 @@ class Orchestrator:
     ) -> TaskResult:
         """Execute a single agent with context"""
         try:
-            return agent.process_request(request, context)
+            return await agent.process_request(request, context)
         except Exception as e:
-            return TaskResult(success=False, content=None, error=str(e))
+            logging.error(f"Error executing agent '{agent.role}': {str(e)}")  # Log the error
+            return TaskResult(success=False, content=None, error=f"Error executing agent '{agent.role}': {str(e)}")
 
     async def _process_sequential(
         self,
@@ -79,7 +92,7 @@ class Orchestrator:
 
         for agent_name in sequence:
             agent = self.agents[agent_name]
-            result = await self._execute_agent(agent, request, contexty)
+            result = await self._execute_agent(agent, request, context)
             if not result.success:
                 break
             context.update({agent_name: result.content})

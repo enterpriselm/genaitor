@@ -4,10 +4,12 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.core import (
-    Agent, Task, Orchestrator, TaskResult,
+    Agent, Task, Orchestrator, TaskResult, Flow,
     ExecutionMode, AgentRole
 )
 from src.llm import GeminiProvider, GeminiConfig
+from dotenv import load_dotenv
+load_dotenv('.env')
 
 # Define custom task
 class AutismSupportTask(Task):
@@ -42,24 +44,17 @@ class AutismSupportTask(Task):
 
 async def main():
     print("\nInitializing Autism Assistant...")
-
-    # Configurar Gemini com múltiplas chaves
-    test_keys = [
-        "AIzaSyCoC6voLEtOEOg5caWaqEIXBh8CiYWoUaY",
-        "AIzaSyDA3r3LpI8cIGm4AVoaDQ65mDMD10GNTVM"
-    ]
+    test_keys = [os.getenv('API_KEY_1'),os.getenv('API_KEY_2')]
     
-    # Configurar Gemini com limite de tokens
     gemini_config = GeminiConfig(
         api_keys=test_keys,
         temperature=0.7,
         verbose=False,
-        max_tokens=2000  # Limite de tokens por request
+        max_tokens=2000
     )
     
     provider = GeminiProvider(gemini_config)
     
-    # Criar agent
     autism_task = AutismSupportTask(
         description="Provide support and information related to autism.",
         goal="Offer accurate and helpful responses to autism-related queries.",
@@ -73,13 +68,14 @@ async def main():
         llm_provider=provider
     )
     
-    # Setup orchestrator
     orchestrator = Orchestrator(
         agents={"gemini": agent},
+        flows={
+            "default_flow": Flow(agents=["gemini"], context_pass=[True])
+        },
         mode=ExecutionMode.SEQUENTIAL
     )
     
-    # Test com perguntas sobre autismo
     questions = [
         "What are the common signs of autism?",
         "How can I support a child with autism?",
@@ -92,7 +88,7 @@ async def main():
         print("=" * 80)
         
         try:
-            result = await orchestrator.process_request(question)
+            result = await orchestrator.process_request(question, flow_name='default_flow')
             
             if result["success"]:
                 if isinstance(result["content"], dict):
@@ -113,5 +109,4 @@ async def main():
             break
 
 if __name__ == "__main__":
-    print("\nStarting Autism Assistant...") 
     asyncio.run(main()) 

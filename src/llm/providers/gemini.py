@@ -6,15 +6,13 @@ import logging
 import os
 import warnings
 from ...utils.text_splitter import TextSplitter
-import tiktoken  # Para contar tokens
+import tiktoken
 
-# Suprimir avisos do TensorFlow/gRPC
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suprimir logs do TensorFlow
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 logging.getLogger('tensorflow').setLevel(logging.ERROR)
 logging.getLogger('grpc').setLevel(logging.ERROR)
 warnings.filterwarnings('ignore', category=UserWarning)
 
-# Desabilitar logs do absl
 from absl import logging as absl_logging
 absl_logging.set_verbosity(absl_logging.ERROR)
 absl_logging._warn_preinit_stderr = False

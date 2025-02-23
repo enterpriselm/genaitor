@@ -1,3 +1,4 @@
+import logging  # Added logging
 from typing import List
 import os
 from .audio import transcribe_audio
@@ -12,6 +13,9 @@ from ..file_processors import (
     read_excel
 )
 from langchain_community.document_loaders import YoutubeLoader
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 def process_media_files(media_files: List[str]) -> str:
     """
@@ -60,7 +64,7 @@ def process_media_files(media_files: List[str]) -> str:
                 text.append(image_to_text(media))
                 
         except Exception as e:
-            print(f"Error processing {media}: {str(e)}")
+            logging.error(f"Error processing {media}: {str(e)}")  # Log the error
             continue
             
     return "\n\n".join(text) 
