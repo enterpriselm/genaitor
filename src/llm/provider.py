@@ -9,7 +9,6 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from functools import lru_cache
 from .key_manager import APIKeyManager
 
-# Suprimir avisos do absl
 absl_logging.set_verbosity(absl_logging.ERROR)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -35,18 +34,15 @@ class GeminiProvider(LLMProvider):
         self.verbose = verbose
         self.max_retries = max_retries
         
-        # Configurar gerenciador de chaves
         self.key_manager = APIKeyManager(api_keys)
         if api_key:
             self.key_manager.add_key(api_key)
         
-        # Configurar logging
         if not self.verbose:
             logging.getLogger('tensorflow').setLevel(logging.ERROR)
             logging.getLogger('absl').setLevel(logging.ERROR)
         
         try:
-            # Tenta obter uma chave válida
             self.current_key = self.key_manager.get_next_key()
             if not self.current_key:
                 raise ValueError("No API key provided")
@@ -57,7 +53,6 @@ class GeminiProvider(LLMProvider):
             raise Exception(f"Failed to initialize Gemini model: {str(e)}")
 
     def _try_with_new_key(self):
-        """Tenta configurar uma nova chave API"""
         try:
             self.current_key = self.key_manager.get_next_key()
             genai.configure(api_key=self.current_key)
@@ -98,16 +93,14 @@ class GeminiProvider(LLMProvider):
                     print(f"Rate limit hit, switching API key...")
                 self.key_manager.mark_key_failed(self.current_key)
                 self._try_with_new_key()
-                raise  # Permite que o retry tente novamente com a nova chave
+                raise
             raise Exception(f"Failed to generate content: {str(e)}")
 
     @lru_cache(maxsize=100)
     def _cached_generate(self, prompt: str, temperature: float, max_tokens: int) -> str:
-        """Versão cacheada da geração de conteúdo"""
         return self.generate(prompt, temperature=temperature, max_tokens=max_tokens)
 
     def generate(self, prompt: str, **kwargs) -> str:
-        # Use cache apenas se temperatura e max_tokens forem os padrões
         if (kwargs.get('temperature', self.temperature) == self.temperature and 
             kwargs.get('max_tokens', self.max_tokens) == self.max_tokens):
             return self._cached_generate(
@@ -120,7 +113,6 @@ class GeminiProvider(LLMProvider):
     def __del__(self):
         """Cleanup when the provider is destroyed"""
         try:
-            # Limpar recursos do gRPC
             import grpc
             grpc.shutdown_all_channels()
         except:
