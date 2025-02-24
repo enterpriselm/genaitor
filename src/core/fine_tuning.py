@@ -26,22 +26,23 @@ class FineTuningTask(Task):
     def execute(self) -> TaskResult:
         try:
             prompt = f"""
-            Você é um especialista em treinamento de modelos de linguagem.
-            O modelo {self.model_name} será ajustado usando o dataset {self.dataset_name}.
-            
-            **Requisitos:**  
-            - Sugira os melhores hiperparâmetros (learning rate, batch size, warmup steps).  
-            - Indique se é necessário usar LoRA ou QLoRA para otimizar memória.  
-            - Informe possíveis riscos ou problemas baseados no dataset.  
-            
-            Retorne um JSON no formato:
-            {{
+            You are an expert in training language models.
+            The model {self.model_name} will be fine-tuned using the dataset {self.dataset_name}.
+
+            Requirements:
+
+            Suggest the best hyperparameters (learning rate, batch size, warmup steps).
+            Indicate if LoRA or QLoRA should be used to optimize memory.
+            Report any potential risks or issues based on the dataset.
+            Return a JSON in the format:
+
+            {
                 "learning_rate": 0.0001,
                 "batch_size": 8,
                 "warmup_steps": 100,
                 "use_LoRA": true,
-                "recommendations": "Evite overfitting usando early stopping."
-            }}
+                "recommendations": "Avoid overfitting by using early stopping."
+            }
             """
             hyperparams = self.llm.generate(prompt)
             
@@ -92,13 +93,14 @@ class ModelDeploymentTask(Task):
     def execute(self) -> TaskResult:
         try:
             prompt = f"""
-            Você é um especialista em deploy de modelos de linguagem.
-            O modelo treinado está localizado em {self.model_dir}.
+            You are an expert in deploying language models.
+            The trained model is located in {self.model_dir}.
 
-            **Tarefas:**  
-            - Sugira a melhor arquitetura para servir esse modelo (FastAPI, Flask, Triton, vLLM, etc.).  
-            - Informe os recursos mínimos necessários (RAM, VRAM, CPU).  
-            - Gere um trecho de código para carregar o modelo e criar um endpoint /generate.  
+            Tasks:
+
+            - Suggest the best architecture to serve this model (FastAPI, Flask, Triton, vLLM, etc.).
+            - Provide the minimum required resources (RAM, VRAM, CPU).
+            - Generate a code snippet to load the model and create a /generate endpoint.            
             """
             deployment_recommendations = self.llm.generate(prompt)
             
