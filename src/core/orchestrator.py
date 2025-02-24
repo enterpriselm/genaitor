@@ -165,7 +165,6 @@ class Orchestrator:
                 "context": context
             }
 
-        # Se o conteúdo for string, converte para dict
         content = result.content
         if isinstance(content, str):
             content = {"main": content}
