@@ -23,6 +23,10 @@ To install the required dependencies, follow these steps:
    pip install -r requirements.txt
    ```
 
+## Diagram
+
+![System Pipeline](https://github.com/enterpriselm/genaitor/blob/main/genaitor.jpg?raw=true)
+
 ## Usage
 
 ### Basic Example
