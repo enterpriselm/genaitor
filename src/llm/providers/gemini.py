@@ -22,7 +22,7 @@ class GeminiConfig(LLMConfig):
         self,
         api_key: Optional[str] = None,
         api_keys: Optional[List[str]] = None,
-        model: str = "gemini-pro",
+        model: str = "gemini-2.0-flash",
         **kwargs
     ):
         super().__init__(**kwargs)

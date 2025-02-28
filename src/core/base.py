@@ -8,6 +8,10 @@ class AgentRole(Enum):
     SPECIALIST = "specialist"
     VALIDATOR = "validator"
     REFINER = "refiner"
+    SUMMARIZER = "summarizer"
+    SCIENTIST = "scientist"
+    ENGINEER = "engineer"
+    ARCHITECT = "atchitect"
     CUSTOM = "custom"
 
 @dataclass
