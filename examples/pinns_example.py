@@ -44,7 +44,7 @@ class GeneralTask(Task):
 
 async def main():
     print("\nInitializing Multi-Agent System...")
-    test_keys = [os.getenv('API_KEY')]
+    test_keys = [os.getenv('API_KEY_1')]
     
     # Set up Gemini configuration
     gemini_config = GeminiConfig(
@@ -141,10 +141,12 @@ async def main():
         mode=ExecutionMode.SEQUENTIAL
     )
     print("\nExecuting Sequential Flow:")
-    for input_data in inputs:
-        result_process = orchestrator_sequential._process_sequential(input_data, flow_name='sequential_flow')
-        result = asyncio.run(result_process)
-        print(result)
+    async def process_all(inputs):
+        for input_data in inputs:
+            result = await orchestrator_sequential._process_sequential(input_data, flow_name='sequential_flow')
+            print(result)
+
+    await process_all(inputs)
     
     # Executing in Parallel Mode
     orchestrator_parallel = Orchestrator(
@@ -160,17 +162,16 @@ async def main():
     )
     print("\nExecuting Parallel Flow:")
     for input_data in inputs:
-        result_process = orchestrator_parallel._process_parallel(input_data, flow_name='parallel_flow')
-        result = asyncio.run(result_process)
+        result = await orchestrator_parallel._process_parallel(input_data, flow_name="parallel_flow")
         
         print(f"User Request: {input_data}")
-        print("=="*20)
-        print('')
+        print("==" * 20)
+        print("")
+        
         for agent in ["solver_agent", "pinn_agent", "optimizer_agent"]:
             print(f"Agent: {agent.capitalize()}\nAnswer: {result['content'][agent].content}")
-            print("=="*20)
-
-    # Executing in Adaptive Mode
+            print("==" * 20)
+# Executing in Adaptive Mode
     orchestrator_adaptive = Orchestrator(
         agents={
             "solver_agent": equation_solver_agent,
@@ -190,14 +191,14 @@ async def main():
     )
     print("\nExecuting Adaptive Flow:")
     for input_data in inputs:
-        result_process = orchestrator_adaptive._process_adaptative(input_data, flow_name='adaptive_flow')
-        result = asyncio.run(result_process)
-        
+        result = await orchestrator_adaptive._process_adaptative(input_data, flow_name="adaptive_flow")
+
         print(f"User Request: {input_data}")
-        print("=="*20)
-        for agent in result['content'].keys():
+        print("==" * 20)
+
+        for agent in result["content"]:
             print(f"Agent: {agent.capitalize()}\nAnswer: {result['content'][agent].content}")
-            print("=="*20)
+            print("==" * 20)
 
 if __name__ == "__main__":
     asyncio.run(main())
