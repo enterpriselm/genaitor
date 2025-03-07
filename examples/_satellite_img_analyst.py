@@ -190,31 +190,30 @@ soil_moisture_analysis_agent = Agent(
     llm_provider=llm_provider
 )
 
-
 def process_satellite_img(img_path, agent):
     agent_mapping = {
         "Disaster Analysis": {
-            "agent": DisasterAnalysisTask,
+            "agent": disaster_analysis_agent,
             "spectral_bands": [2, 3, 4, 8, 11]
         },
         "Agro Analysis": {
-            "agent": AgroAnalysisTask,
+            "agent": agro_analysis_agent,
             "spectral_bands": [3, 4, 8, 11]
         },
         "Ecological Analysis": {
-            "agent": EcologicalAnalysisTask,
+            "agent": ecological_analysis_agent,
             "spectral_bands": [2, 3, 4, 8]
         },
         "Air Quality Analysis": {
-            "agent": AirQualityAnalysisTask,
+            "agent": air_quality_analysis_agent,
             "spectral_bands": [1, 9, 10]
         },
         "Vegetation Analysis": {
-            "agent": VegetationAnalysisTask,
+            "agent": vegetation_analysis_agent,
             "spectral_bands": [4, 5, 6, 7, 8]
         },
         "Soil Moisture Analysis": {
-            "agent": SoilMoistureAnalysisTask,
+            "agent": soil_moisture_analysis_agent,
             "spectral_bands": [9, 12, 13]
         }
     }
@@ -223,20 +222,21 @@ def process_satellite_img(img_path, agent):
         image_band = {}
         for band in agent_mapping[agent]["spectral_bands"]:
             image_band[band] = dataset.read(band)
-                        
-        orchestrator = Orchestrator(
-            agents={
-                agent: agent_mapping[agent]},
-            flows={
-                "analysis_flow": Flow(
-                    agents=[
-                "disaster_analysis_agent"],
-            context_pass=[True])})
-        
-        result_process = orchestrator.process_request(
-            {"input_data": image_band},
-            flow_name="analysis_flow"
-        )
-        result = asyncio.run(result_process)
-        
+
+    orchestrator = Orchestrator(
+        agents={
+            agent: agent_mapping[agent]['agent']},
+        flows={
+            "analysis_flow": Flow(
+                agents=[
+            agent],
+        context_pass=[True])},
+        mode=ExecutionMode.SEQUENTIAL)
+    
+    result_process = orchestrator.process_request(
+        {"input_data": image_band},
+        flow_name="analysis_flow"
+    )
+    result = asyncio.run(result_process)
+    
 process_satellite_img('caminho/para/imagem_sentinel.tif')

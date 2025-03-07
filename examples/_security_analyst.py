@@ -1,3 +1,6 @@
+#TODO: Implementar Análise de logs de redes
+
+
 import asyncio
 import requests
 from bs4 import BeautifulSoup
