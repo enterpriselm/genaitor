@@ -1,1 +1,0 @@
-"Como podemos treinar um modelo para detectar anomalias em dados de sensores industriais, com base em padrões de falhas em máquinas e equipamentos?"
