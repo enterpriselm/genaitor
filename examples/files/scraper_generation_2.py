@@ -1,87 +1,49 @@
 
-"""
-This Python code provides a structured representation of the HTML snippet from a Google Scholar search results page,
-focusing on the citation information for a specific paper on "Physics Informed Deep Learning".
-It extracts and organizes key details such as the paper's title, authors, publication details,
-and links to related resources.
+   import requests
+   from bs4 import BeautifulSoup
 
-The code doesn't execute any web scraping or HTML parsing directly. Instead, it models the data
-that would be obtained from parsing the HTML using a library like BeautifulSoup.
-This approach allows for a clear and documented representation of the data structure
-without requiring live access to the internet or relying on specific HTML parsing implementations.
+   def scrape_google_scholar_links(html_content, output_file="paper_links.txt"):
+       """
+       Scrapes paper links from a Google Scholar HTML content and saves them to a file.
 
-Example Usage:
+       Args:
+           html_content (str): The HTML content of the Google Scholar page.
+           output_file (str): The name of the file to save the links to.  Defaults to "paper_links.txt".
 
-# After parsing the HTML with BeautifulSoup (or similar) and extracting the relevant data:
-paper_data = {
-    "title": "Physics informed deep learning for function approximation & PDE discovery",
-    "authors": "M Raissi, P Perdikaris, GE Karniadakis",
-    "journal": "Journal of computational physics, 2019 - Elsevier",
-    "abstract": "… approximate solutions to partial differential equations (PDEs). We present two distinct deep learning … \n… that we refer to as physics informed neural networks (PINNs). The first type is physics-…",
-    "pdf_link": "https://arxiv.org/pdf/1711.10566",
-    "citation_link": "/citations?user=z46i-8EAAAAJ&hl=pt-BR&oe=ASCII&oi=sra",
-    "cited_by_link": "/scholar?cites=13665969991236718147&as_sdt=2005&sciodt=0,5&hl=pt-BR&oe=ASCII",
-    "related_articles_link": "/scholar?q=related:Vb3_10dIKzYJ:scholar.google.com/&scioq=physics+informed+neural+networks&hl=pt-BR&oe=ASCII&as_sdt=0,5",
-    "all_versions_link": "/scholar?cluster=13665969991236718147&hl=pt-BR&oe=ASCII&as_sdt=0,5"
-}
+       Returns:
+           None: The function saves the links to a file.  Prints a confirmation message upon completion.
+       """
 
-# Create a Paper object to represent the data:
-paper = Paper(paper_data)
+       soup = BeautifulSoup(html_content, 'html.parser')
 
-# Access the extracted information:
-print(f"Title: {paper.title}")
-print(f"Authors: {paper.authors}")
-print(f"Journal: {paper.journal}")
-print(f"PDF Link: {paper.pdf_link}")
-print(f"Cited By Link: {paper.cited_by_link}")
-"""
+       # Find all <a> tags that have an href attribute. These usually contain the paper links.
+       links = soup.find_all('a', href=True)
 
+       paper_links = []
+       for link in links:
+           href = link['href']
+           # Filter for links that seem like actual paper URLs (can be refined further)
+           if href.startswith(('http', 'www')) and not 'google' in href:  #Exclude google links
+               paper_links.append(href)
 
-class Paper:
-    """
-    Represents a research paper entry from Google Scholar search results.
-    """
+       # Remove duplicate links using set
+       paper_links = list(set(paper_links))
 
-    def __init__(self, data):
-        """
-        Initializes a Paper object with data extracted from the HTML.
+       # Save the links to the specified file
+       with open(output_file, 'w') as f:
+           for link in paper_links:
+               f.write(link + '\n')
 
-        Args:
-            data (dict): A dictionary containing the paper's information.
-        """
-        self.title = data.get("title", "")
-        self.authors = data.get("authors", "")
-        self.journal = data.get("journal", "")
-        self.abstract = data.get("abstract", "")
-        self.pdf_link = data.get("pdf_link", "")
-        self.citation_link = data.get("citation_link", "")
-        self.cited_by_link = data.get("cited_by_link", "")
-        self.related_articles_link = data.get("related_articles_link", "")
-        self.all_versions_link = data.get("all_versions_link", "")
+       print(f"Successfully scraped and saved {len(paper_links)} paper links to {output_file}")
 
-    def __str__(self):
-        """
-        Returns a string representation of the Paper object.
-        """
-        return f"Title: {self.title}\nAuthors: {self.authors}\nJournal: {self.journal}"
+   url = "YOUR_GOOGLE_SCHOLAR_PAGE_URL"  # Replace with the actual URL
 
+   try:
+       response = requests.get(url)
+       response.raise_for_status()  # Raise an exception for bad status codes
+       html = response.text
+       scrape_google_scholar_links(html)  # Call the function
+   except requests.exceptions.RequestException as e:
+       print(f"An error occurred: {e}")
 
-if __name__ == "__main__":
-    # Example Usage (simulated data)
-    paper_data = {
-        "title": "Physics informed deep learning for function approximation & PDE discovery",
-        "authors": "M Raissi, P Perdikaris, GE Karniadakis",
-        "journal": "Journal of computational physics, 2019 - Elsevier",
-        "abstract": "… approximate solutions to partial differential equations (PDEs). We present two distinct deep learning … \n… that we refer to as physics informed neural networks (PINNs). The first type is physics-…",
-        "pdf_link": "https://arxiv.org/pdf/1711.10566",
-        "citation_link": "/citations?user=z46i-8EAAAAJ&hl=pt-BR&oe=ASCII&oi=sra",
-        "cited_by_link": "/scholar?cites=13665969991236718147&as_sdt=2005&sciodt=0,5&hl=pt-BR&oe=ASCII",
-        "related_articles_link": "/scholar?q=related:Vb3_10dIKzYJ:scholar.google.com/&scioq=physics+informed+neural+networks&hl=pt-BR&oe=ASCII&as_sdt=0,5",
-        "all_versions_link": "/scholar?cluster=13665969991236718147&hl=pt-BR&oe=ASCII&as_sdt=0,5",
-    }
-
-    paper = Paper(paper_data)
-
-    print(paper)  # Print the string representation of the paper
-    print(f"PDF Link: {paper.pdf_link}")  # Access and print the PDF link
-    print(f"Cited By Link: {paper.cited_by_link}")  # Access and print the "Cited By" link
+   

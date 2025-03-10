@@ -93,8 +93,9 @@ async def main():
     )
     
     html = BeautifulSoup(requests.get('https://scholar.google.com/scholar?hl=pt-BR&as_sdt=0%2C5&q=physics+informed+neural+networks&btnG=&oq=physics+informed+').content,'html.parser')
+    html_text = " ".join(html.get_text().split())
     user_requirements = "All paper links for all pages"
-    input_data = f"User Requirements:{user_requirements}/n/nHTML: {html}"
+    input_data = f"User Requirements:{user_requirements}/n/nHTML: {html_text}"
     print("Starting scraper generaton for the Guardian to get news titles.")
     try:
         result = await orchestrator.process_request(input_data, flow_name='web_scraping_flow')
