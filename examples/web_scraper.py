@@ -6,83 +6,11 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.core import (
-    Agent, Task, Orchestrator, Flow,
-    ExecutionMode, AgentRole, TaskResult
-)
-from src.llm import GeminiProvider, GeminiConfig
-from dotenv import load_dotenv
-load_dotenv('.env')
-
-class WebScraping(Task):
-    def __init__(self, description: str, goal: str, output_format: str, llm_provider):
-        super().__init__(description, goal, output_format)
-        self.llm = llm_provider
-
-    def execute(self, input_data: str) -> TaskResult:
-        prompt = f"""
-        Task: {self.description}
-        Goal: {self.goal}
-        
-        {input_data}
-        
-        Please provide a response following the format:
-        {self.output_format}
-        """
-        
-        try:
-            response = self.llm.generate(prompt)
-            return TaskResult(
-                success=True,
-                content=response,
-                metadata={"task_type": self.description}
-            )
-        except Exception as e:
-            return TaskResult(
-                success=False,
-                content=None,
-                error=str(e)
-            )
-
+from src.core import Orchestrator, Flow, ExecutionMode
+from presets.agents import html_analysis_agent, scraper_generation_agent
 
 async def main():
     print("\nInitializing Web Scraping System...")
-    test_keys = [os.getenv('API_KEY')]
-    
-    # Set up Gemini configuration
-    gemini_config = GeminiConfig(
-        api_keys=test_keys,
-        temperature=0.7,
-        verbose=False,
-        max_tokens=5000
-    )
-    provider = GeminiProvider(gemini_config)
-    
-    html_analysis_task = WebScraping(
-        description="Find Necessary Data",
-        goal="Retrieve all information about which HTML part is the information needed",
-        output_format="Concise and informative",
-        llm_provider=provider
-    )
-    
-    scraper_generation = WebScraping(
-        description="Code Generator",
-        goal="Based on the HTML struture and on where the data is, create a python code to scrape that data and store in a file.",
-        output_format="Complete, concize and documentated python code",
-        llm_provider=provider
-    )
-    
-    html_analysis_agent = Agent(
-        role=AgentRole.SPECIALIST,
-        tasks=[html_analysis_task],
-        llm_provider=provider
-    )
-    scraper_generation_agent = Agent(
-        role=AgentRole.SPECIALIST,
-        tasks=[scraper_generation],
-        llm_provider=provider
-    )
-
     orchestrator = Orchestrator(
         agents={"html_analysis_agent": html_analysis_agent, 
                 "scraper_generation_agent": scraper_generation_agent},

@@ -4,75 +4,16 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.core import (
-    Agent, Task, Orchestrator, Flow,
-    ExecutionMode, AgentRole, TaskResult
+    Orchestrator, Flow, ExecutionMode
 )
-from src.llm import GeminiProvider, GeminiConfig
-from dotenv import load_dotenv
-load_dotenv('.env')
+from presets.agents import qa_agent
     
-# Define custom task
-class QuestionAnsweringTask(Task):
-    def __init__(self, description: str, goal: str, output_format: str, llm_provider):
-        super().__init__(description, goal, output_format)
-        self.llm = llm_provider
-
-    def execute(self, input_data: str) -> TaskResult:
-        prompt = f"""
-        Task: {self.description}
-        Goal: {self.goal}
-        
-        Question: {input_data}
-        
-        Please provide a response following the format:
-        {self.output_format}
-        """
-        
-        try:
-            response = self.llm.generate(prompt)
-            return TaskResult(
-                success=True,
-                content=response,
-                metadata={"task_type": "qa"}
-            )
-        except Exception as e:
-            return TaskResult(
-                success=False,
-                content=None,
-                error=str(e)
-            )
-
 async def main():
     print("\nInitializing Advanced Usage Demo...")
-    test_keys = [os.getenv('API_KEY_1'),os.getenv('API_KEY_2')]
-    
-    # Set Gemini with token limits
-    gemini_config = GeminiConfig(
-        api_keys=test_keys,
-        temperature=0.7,
-        verbose=False,
-        max_tokens=2000
-    )
-    
-    provider = GeminiProvider(gemini_config)
-    
-    # Create agent
-    qa_task = QuestionAnsweringTask(
-        description="Answer questions using Gemini",
-        goal="Provide accurate and helpful answers",
-        output_format="Clear, concise response",
-        llm_provider=provider
-    )
-    
-    agent = Agent(
-        role=AgentRole.SPECIALIST,
-        tasks=[qa_task],
-        llm_provider=provider
-    )
     
     # Setup orchestrator
     orchestrator = Orchestrator(
-        agents={"gemini": agent},
+        agents={"gemini": qa_agent},
         flows={
             "default_flow": Flow(agents=["gemini"], context_pass=[True])
         },

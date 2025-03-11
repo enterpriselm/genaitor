@@ -1,3 +1,8 @@
+from colorama import Fore, Style, init
+init(autoreset=True)
+
+BLUE_PASTEL = "\033[38;2;173;216;230m"
+
 import google.generativeai as genai
 from ..base import LLMProvider, LLMConfig
 from ..key_manager import APIKeyManager
@@ -102,11 +107,10 @@ class GeminiProvider(LLMProvider):
             # Formatar o prompt como o Gemini espera
             parts = [{"text": prompt}]
             
-            print(f"Model: {self.config.model}")
-            print(f"Temperature: {self.config.temperature}")
-            print(f"Max Tokens: {self.config.max_tokens}")
-            print(f"Prompt:\n{prompt[:200]}...")
-            
+            print(f"{BLUE_PASTEL}Model: {self.config.model}{Style.RESET_ALL}")
+            print(f"{BLUE_PASTEL}Temperature: {self.config.temperature}{Style.RESET_ALL}")
+            print(f"{BLUE_PASTEL}Max Tokens: {self.config.max_tokens}{Style.RESET_ALL}")
+
             response = self._model.generate_content(
                 parts,
                 generation_config=generation_config
@@ -120,8 +124,6 @@ class GeminiProvider(LLMProvider):
             if response and response.candidates:
                 content = response.candidates[0].content.parts[0].text
                 if content:
-                    print("\nFinal Content:")
-                    print(content[:200] + "..." if len(content) > 200 else content)
                     return content
                     
             raise Exception("Empty response from Gemini")

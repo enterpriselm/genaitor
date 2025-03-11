@@ -4,77 +4,12 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.core import (
-    Agent, Task, Orchestrator, Flow,
-    ExecutionMode, AgentRole, TaskResult
+    Orchestrator, Flow, ExecutionMode
 )
-from src.llm import GeminiProvider, GeminiConfig
-from dotenv import load_dotenv
-load_dotenv('.env')
-
-# Define custom task for creating new agents
-class AgentCreationTask(Task):
-    def __init__(self, description: str, goal: str, output_format: str, llm_provider):
-        super().__init__(description, goal, output_format)
-        self.llm = llm_provider
-
-    def execute(self, input_data: str) -> TaskResult:
-        prompt = f"""
-        Task: {self.description}
-        Goal: {self.goal}
-        
-        Based on the following input, create a new task that an agent can perform:
-        
-        Input: {input_data}
-        
-        Please describe the new task, including:
-        1. Description of the task
-        2. The goal of the task
-        3. Output format
-        
-        Format it in a way that it can be understood and performed by an agent.
-        """
-
-        try:
-            response = self.llm.generate(prompt)
-            return TaskResult(
-                success=True,
-                content=response,
-                metadata={"task_type": "agent_creation"}
-            )
-        except Exception as e:
-            return TaskResult(
-                success=False,
-                content=None,
-                error=str(e)
-            )
+from presets.agents import agent_creation
 
 async def main():
     print("\nInitializing Agent Creation Demo...")
-    test_keys = [os.getenv('API_KEY_1'),os.getenv('API_KEY_2')]
-    
-    gemini_config = GeminiConfig(
-        api_keys=test_keys,
-        temperature=0.7,
-        verbose=False,
-        max_tokens=2000
-    )
-    
-    provider = GeminiProvider(gemini_config)
-    
-    agent_creation_task = AgentCreationTask(
-        description="Create a new agent based on user input",
-        goal="Generate a new agent task description and goal",
-        output_format="Task description, goal, and output format",
-        llm_provider=provider
-    )
-    
-    agent_creation = Agent(
-        role=AgentRole.SPECIALIST,
-        tasks=[agent_creation_task],
-        llm_provider=provider
-    )
-    
-    # Setup orchestrator
     orchestrator = Orchestrator(
         agents={"creator": agent_creation},
         flows={

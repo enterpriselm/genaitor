@@ -17,112 +17,12 @@ from typing import Dict, Any
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.core import (
-    Agent, Task, Orchestrator, Flow,
-    ExecutionMode, AgentRole, TaskResult
+    Orchestrator, Flow, ExecutionMode
 )
-from src.llm import GeminiProvider, GeminiConfig
-
-load_dotenv('.env')
-
-class CVTask(Task):
-    def __init__(self, description: str, goal: str, output_format: str, llm_provider):
-        super().__init__(description, goal, output_format)
-        self.llm = llm_provider
-
-    def execute(self, input_data: Dict[str, Any]) -> TaskResult:
-        prompt = f"""
-        Task: {self.description}
-        Goal: {self.goal}
-
-        Input:
-        {json.dumps(input_data, indent=4)}
-
-        Provide the response in the following format:
-        {self.output_format}
-        """
-
-        try:
-            response = self.llm.generate(prompt)
-            return TaskResult(
-                success=True,
-                content=response,
-                metadata={"task_type": self.description}
-            )
-        except Exception as e:
-            return TaskResult(
-                success=False,
-                content=None,
-                error=str(e)
-            )
+from presets.agents import extraction_agent, matching_agent, scoring_agent, report_agent
 
 async def main():
     print("\n🚀 Inicializando sistema de análise de currículos...")
-
-    test_keys = [os.getenv('API_KEY')]
-
-    gemini_config = GeminiConfig(
-        api_keys=test_keys,
-        temperature=0.7,
-        verbose=False,
-        max_tokens=5000
-    )
-    provider = GeminiProvider(gemini_config)
-
-    # Definição das tarefas
-    data_extraction = CVTask(
-        description="Data Extraction",
-        goal="Extract relevant information from resumes",
-        output_format="JSON format with Name, Experience, Skills, Education, and Certifications",
-        llm_provider=provider
-    )
-
-    skill_matching = CVTask(
-        description="Skill Matching",
-        goal="Match extracted skills with job requirements",
-        output_format="Matched and missing skills in JSON format",
-        llm_provider=provider
-    )
-
-    cv_scoring = CVTask(
-        description="CV Scoring",
-        goal="Score the resume based on experience, skills, and education",
-        output_format="Score out of 100",
-        llm_provider=provider
-    )
-
-    report_generation = CVTask(
-        description="Report Generation",
-        goal="Generate a structured candidate evaluation report",
-        output_format="PDF or Markdown format",
-        llm_provider=provider
-    )
-
-    # Definição dos agentes
-    extraction_agent = Agent(
-        role=AgentRole.ANALYST,
-        tasks=[data_extraction],
-        llm_provider=provider
-    )
-
-    matching_agent = Agent(
-        role=AgentRole.EVALUATOR,
-        tasks=[skill_matching],
-        llm_provider=provider
-    )
-
-    scoring_agent = Agent(
-        role=AgentRole.SCORER,
-        tasks=[cv_scoring],
-        llm_provider=provider
-    )
-
-    report_agent = Agent(
-        role=AgentRole.REPORTER,
-        tasks=[report_generation],
-        llm_provider=provider
-    )
-
-    # Orquestração do fluxo de análise de currículos
     orchestrator = Orchestrator(
         agents={
             "extraction_agent": extraction_agent,

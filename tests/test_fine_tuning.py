@@ -1,6 +1,6 @@
 import asyncio
 import unittest
-from src.core.fine_tuning import FineTuningTask
+from llm.fine_tuning import FineTuningTask
 from src.core.base import TaskResult
 
 class MockLLMProvider:

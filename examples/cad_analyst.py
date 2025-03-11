@@ -1,130 +1,17 @@
 import os
 import sys
 import asyncio
-from dotenv import load_dotenv
 
 # Add project path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.core import (
-    Agent, Task, Orchestrator, Flow,
-    ExecutionMode, AgentRole, TaskResult
+    Orchestrator, Flow, ExecutionMode
 )
-from src.llm import GeminiProvider, GeminiConfig
-load_dotenv('.env')
-
-class ProblemAnalysis(Task):
-    def __init__(self, description: str, goal: str, output_format: str, llm_provider):
-        super().__init__(description, goal, output_format)
-        self.llm = llm_provider
-
-    def execute(self, input_data: str) -> TaskResult:
-        prompt = f"""
-        Task: {self.description}
-        Goal: {self.goal}
-        
-        {input_data}
-        
-        Please provide a response following the format:
-        {self.output_format}
-        """
-        
-        try:
-            response = self.llm.generate(prompt)
-            return TaskResult(
-                success=True,
-                content=response,
-                metadata={"task_type": self.description}
-            )
-        except Exception as e:
-            return TaskResult(
-                success=False,
-                content=None,
-                error=str(e)
-            )
-
-class PINNModeling(Task):
-    def __init__(self, description: str, goal: str, output_format: str, llm_provider):
-        super().__init__(description, goal, output_format)
-        self.llm = llm_provider
-
-    def execute(self, input_data: str) -> TaskResult:
-        prompt = f"""
-        Task: {self.description}
-        Goal: {self.goal}
-        
-        {input_data}
-        
-        Please provide a response following the format:
-        {self.output_format}
-        """
-        
-        try:
-            response = self.llm.generate(prompt)
-            return TaskResult(
-                success=True,
-                content=response,
-                metadata={"task_type": self.description}
-            )
-        except Exception as e:
-            return TaskResult(
-                success=False,
-                content=None,
-                error=str(e)
-            )
+from presets.agents import problem_analysis_agent, numerical_analysis_agent, pinn_modeling_agent
 
 async def main():
     print("\nInitializing FEM/FVM/FEA Problem Solver System...")
-    test_keys = [os.getenv('API_KEY')]
-
-    # Set up Gemini configuration
-    gemini_config = GeminiConfig(
-        api_keys=test_keys,
-        temperature=0.7,
-        verbose=False,
-        max_tokens=10000
-    )
-    provider = GeminiProvider(gemini_config)
-    
-    problem_analysis_task = ProblemAnalysis(
-        description="Problem Analysis for FEM/FVM/FEA",
-        goal="Analyze the problem and determine which approach (FEM, FVM, or FEA) is suitable for the given input.",
-        output_format="Detailed analysis with methodology selection",
-        llm_provider=provider
-    )
-
-    numerical_modeling_task = ProblemAnalysis(
-        description="Solve the problem using the method recommended",
-        goal="Solve the problem based on recommended method, using Python",
-        output_format="Documented and full python code",
-        llm_provider=provider
-    )
-
-    pinn_modeling_task = PINNModeling(
-        description="PINN Modeling",
-        goal="Model a Physics Informed Neural Network to solve the problem and compare it with FEM/FVM/FEA results.",
-        output_format="Complete Python code to build and solve the PINN, with comparison of results",
-        llm_provider=provider
-    )
-    
-    problem_analysis_agent = Agent(
-        role=AgentRole.SPECIALIST,
-        tasks=[problem_analysis_task],
-        llm_provider=provider
-    )
-    
-    numerical_analysis_agent = Agent(
-        role=AgentRole.SPECIALIST,
-        tasks=[numerical_modeling_task],
-        llm_provider=provider
-    )
-    
-    pinn_modeling_agent = Agent(
-        role=AgentRole.SPECIALIST,
-        tasks=[pinn_modeling_task],
-        llm_provider=provider
-    )
-    
     orchestrator = Orchestrator(
         agents={"problem_analysis_agent": problem_analysis_agent,
                 "numerical_modelling_agent": numerical_analysis_agent, 

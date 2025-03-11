@@ -3,86 +3,11 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.core import (
-    Agent, Task, Orchestrator, Flow,
-    ExecutionMode, AgentRole, TaskResult
-)
-from src.llm import GeminiProvider, GeminiConfig
-from dotenv import load_dotenv
-load_dotenv('.env')
-    
-# Define custom task
-class LLMTask(Task):
-    def __init__(self, description: str, goal: str, output_format: str, llm_provider):
-        super().__init__(description, goal, output_format)
-        self.llm = llm_provider
-
-    def execute(self, input_data: str) -> TaskResult:
-        prompt = f"""
-        Task: {self.description}
-        Goal: {self.goal}
-        
-        Input: {input_data}
-        
-        Please provide a response following the format:
-        {self.output_format}
-        """
-        
-        try:
-            response = self.llm.generate(prompt)
-            return TaskResult(
-                success=True,
-                content=response,
-                metadata={"task_type": self.description}
-            )
-        except Exception as e:
-            return TaskResult(
-                success=False,
-                content=None,
-                error=str(e)
-            )
+from src.core import Orchestrator, Flow, ExecutionMode
+from presets.agents import qa_agent, summarization_agent
 
 async def main():
     print("\nInitializing Multi-Agent System...")
-    test_keys = [os.getenv('API_KEY')]
-    
-    # Set up Gemini configuration
-    gemini_config = GeminiConfig(
-        api_keys=test_keys,
-        temperature=0.7,
-        verbose=False,
-        max_tokens=2000
-    )
-    provider = GeminiProvider(gemini_config)
-    
-    # Define tasks
-    qa_task = LLMTask(
-        description="Question Answering",
-        goal="Provide clear and accurate responses",
-        output_format="Concise and informative",
-        llm_provider=provider
-    )
-    
-    summarization_task = LLMTask(
-        description="Text Summarization",
-        goal="Summarize lengthy content into key points",
-        output_format="Bullet points or short paragraph",
-        llm_provider=provider
-    )
-    
-    # Create agents
-    qa_agent = Agent(
-        role=AgentRole.SPECIALIST,
-        tasks=[qa_task],
-        llm_provider=provider
-    )
-    summarization_agent = Agent(
-        role=AgentRole.SPECIALIST,
-        tasks=[summarization_task],
-        llm_provider=provider
-    )
-    
-    # Setup orchestrator with multiple agents
     orchestrator = Orchestrator(
         agents={"qa_agent": qa_agent, "summarization_agent": summarization_agent},
         flows={

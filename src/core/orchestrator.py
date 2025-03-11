@@ -3,7 +3,12 @@ from .base import TaskResult, AgentRole
 from .agent import Agent
 from enum import Enum
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
+from colorama import Style, init
+
+init(autoreset=True)
+
+GREEN_PASTEL = "\033[38;2;144;238;144m"
+
 import logging  # Added logging
 
 # Configure logging
@@ -81,7 +86,8 @@ class Orchestrator:
             flow = self.flows[flow_name]
             results = {}
             context = {}
-            print(f"Agents: {flow.agents}, Context Pass: {flow.context_pass}")
+        
+            print(f"{GREEN_PASTEL}Agents: {flow.agents}, Context Pass: {flow.context_pass}{Style.RESET_ALL}")
 
             for i, agent_name in enumerate(flow.agents):
                 agent = self.agents[agent_name]
@@ -201,14 +207,14 @@ class Orchestrator:
                     return {"success": False, "content": None, "error": f"Invalid agent selection: {chosen_agent_name}"}
                 
                 chosen_agent = available_agents[chosen_agent_name]
-                print(f"User: {request}\n")
-                print(f"Orchestrator decision: Passing input to {chosen_agent_name}")
+                print(f"{GREEN_PASTEL}User: {request}\n{Style.RESET_ALL}")
+                print(f"{GREEN_PASTEL}Orchestrator decision: Passing input to {chosen_agent_name}{Style.RESET_ALL}")
                 
                 agent_response = await self._execute_agent(chosen_agent, current_input, context)
                 results[chosen_agent_name] = agent_response
                 context[chosen_agent_name] = agent_response.content
                 
-                print(f"{chosen_agent_name} response:\n {agent_response.content}")
+                print(f"{GREEN_PASTEL}{chosen_agent_name} response:\n {agent_response.content}{Style.RESET_ALL}")
                 
                 # Validator checks if the response is sufficient
                 validation_prompt = (
@@ -224,7 +230,7 @@ class Orchestrator:
                 validator_response = await self._execute_agent(validator, validation_prompt, context)
                 validation_decision = validator_response.content.split('ecision: ')[-1]
                 
-                print(f"Validator decision: {validation_decision}")
+                print(f"{GREEN_PASTEL}Validator decision: {validation_decision}{Style.RESET_ALL}")
                 
                 if "complete" in validation_decision.lower() or "is complete" in validator_response.content.lower():
                     break  # Exit loop if the validator confirms completion
