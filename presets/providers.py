@@ -4,7 +4,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.llm import GeminiProvider, GeminiConfig
 from dotenv import load_dotenv
-load_dotenv('.env')
+load_dotenv(r'C:\Users\SafeGain\projects\genaitor\.env')
 
 api_keys = [os.getenv('API_KEY')]
 

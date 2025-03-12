@@ -26,8 +26,9 @@ async def main():
     
     # Process each input and create a new agent
     for user_input in user_inputs:
-        print(f"\nUser Input: {user_input}")
+        print(f"\nUser Input:\n\n {user_input}\n")
         print("=" * 80)
+        print("\n")
         
         try:
             result = await orchestrator.process_request(user_input, flow_name='default_flow')
@@ -36,9 +37,10 @@ async def main():
                 if isinstance(result["content"], dict):
                     content = result["content"].get("creator")
                     if content and content.success:
-                        print("\nGenerated Task for New Agent:")
+                        print("\nGenerated Task for New Agent:\n")
                         print("-" * 80)
-                        
+                        print("\n")
+                             
                         formatted_text = content.content.strip()
                         
                         formatted_text = formatted_text.replace("**", "")

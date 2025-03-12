@@ -1,163 +1,197 @@
 
 import pandas as pd
 import numpy as np
+from scipy import stats
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Load the dataset
-# Assuming the data is in a CSV file named 'your_data.csv'
+# Assuming the data is in a CSV file named 'temperature_data.csv'
 try:
-    df = pd.read_csv('examples/files/temperature.csv')
+    df = pd.read_csv('temperature_data.csv')
 except FileNotFoundError:
-    print("Error: 'temperature.csv' not found.  Make sure the file is in the correct directory, or update the file path.")
+    print("Error: temperature_data.csv not found.  Please ensure the file is in the correct directory.")
     exit()
 
+# --- Data Cleaning and Preprocessing ---
 
-# --- Data Quality Checks and Cleaning ---
+# Convert year, month, day to datetime objects (Handle missing days/months if needed)
+df['Date'] = pd.to_datetime(df[['year', 'month', 'day']].astype(str).agg('-'.join, axis=1), errors='coerce')
 
-# Check for missing values
-print("\nMissing Values:\n", df.isnull().sum())
+# Fill missing temperature values (Simple imputation - can be improved)
+df['AverageTemperatureFahr'].fillna(df['AverageTemperatureFahr'].mean(), inplace=True)
+df['AverageTemperatureUncertaintyFahr'].fillna(df['AverageTemperatureUncertaintyFahr'].mean(), inplace=True) #Or median
 
-# Check if 'day' column only contains the value 1
-if (df['day'] != 1).any():
-    print("\nWARNING: The 'day' column contains values other than 1. Investigate.")
-else:
-    print("\nThe 'day' column only contains the value 1.")
+# --- Anomaly Detection Functions ---
 
-# --- Latitude and Longitude Parsing ---
+def detect_missing_data_anomalies(df, column, threshold=0.5):
+    """
+    Identifies years with a high percentage of missing data in a specified column.
 
-def parse_coordinates(coord_str):
-    """Parses latitude or longitude string (e.g., '36.17S') into a float."""
-    if isinstance(coord_str, str):  # Handle potential NaN values
-        value = float(coord_str[:-1])
-        direction = coord_str[-1]
-        if direction in ['S', 'W']:
-            value = -value
-        return value
-    else:
-        return np.nan  # Return NaN if the value is not a string (e.g., NaN)
+    Args:
+        df (pd.DataFrame): The input DataFrame.
+        column (str): The name of the column to check for missing values.
+        threshold (float): The threshold for the percentage of missing data (e.g., 0.5 for 50%).
 
+    Returns:
+        pd.DataFrame: A DataFrame containing years with a missing data percentage above the threshold.
+    """
+    missing_data_by_year = df.groupby('year')[column].apply(lambda x: x.isnull().sum() / len(x))
+    anomalous_years = missing_data_by_year[missing_data_by_year > threshold].index.tolist()
+    return anomalous_years
 
-df['Latitude_parsed'] = df['Latitude'].apply(parse_coordinates)
-df['Longitude_parsed'] = df['Longitude'].apply(parse_coordinates)
+def detect_high_uncertainty_regions(df, uncertainty_column='AverageTemperatureUncertaintyFahr', percentile=95):
+    """
+    Identifies cities/countries with consistently high temperature uncertainty.
 
-# Validate parsed latitude and longitude
-valid_latitude = df[(df['Latitude_parsed'] >= -90) & (df['Latitude_parsed'] <= 90)]
-valid_longitude = df[(df['Longitude_parsed'] >= -180) & (df['Longitude_parsed'] <= 180)]
+    Args:
+        df (pd.DataFrame): The input DataFrame.
+        uncertainty_column (str): The name of the column containing uncertainty values.
+        percentile (int): The percentile to use as a threshold for high uncertainty.
 
-if len(valid_latitude) != len(df):
-    print("\nWARNING: Invalid latitude values found (outside -90 to 90 range).")
-if len(valid_longitude) != len(df):
-    print("\nWARNING: Invalid longitude values found (outside -180 to 180 range).")
+    Returns:
+        pd.DataFrame: A DataFrame of cities/countries with uncertainty above the specified percentile.
+    """
+    uncertainty_threshold = df[uncertainty_column].quantile(percentile / 100)
+    high_uncertainty_locations = df.groupby(['City', 'Country'])[uncertainty_column].mean()
+    anomalous_locations = high_uncertainty_locations[high_uncertainty_locations > uncertainty_threshold].index.tolist()
+    return anomalous_locations
 
+def detect_temperature_spikes(df, city, temperature_column='AverageTemperatureFahr', window=30, std_dev_threshold=3):
+    """
+    Detects temperature spikes/dips in a time series for a specific city using a moving average.
 
-# --- Descriptive Statistics ---
+    Args:
+        df (pd.DataFrame): The input DataFrame.
+        city (str): The city to analyze.
+        temperature_column (str): The name of the column containing temperature values.
+        window (int): The window size for the moving average.
+        std_dev_threshold (float): The number of standard deviations from the moving average to consider a spike/dip.
 
-print("\nDescriptive Statistics for record_id:\n", df['record_id'].describe())
-print("\nDescriptive Statistics for year:\n", df['year'].describe())
-print("\nDescriptive Statistics for Latitude (Parsed):\n", df['Latitude_parsed'].describe())
-print("\nDescriptive Statistics for Longitude (Parsed):\n", df['Longitude_parsed'].describe())
+    Returns:
+        pd.DataFrame: A DataFrame containing dates of detected temperature spikes/dips.
+    """
+    city_data = df[df['City'] == city].sort_values('Date')
+    city_data['MovingAverage'] = city_data[temperature_column].rolling(window=window, center=True).mean() #Centered moving average
+    city_data['StdDev'] = city_data[temperature_column].rolling(window=window, center=True).std()
+    city_data['UpperThreshold'] = city_data['MovingAverage'] + std_dev_threshold * city_data['StdDev']
+    city_data['LowerThreshold'] = city_data['MovingAverage'] - std_dev_threshold * city_data['StdDev']
+    city_data['Spike'] = (city_data[temperature_column] > city_data['UpperThreshold']) | (city_data[temperature_column] < city_data['LowerThreshold'])
+    spikes = city_data[city_data['Spike']][['Date', temperature_column, 'MovingAverage', 'StdDev']]
+    return spikes
 
+def detect_unusual_seasonal_patterns(df, city, temperature_column='AverageTemperatureFahr', comparison_year=2000):
+    """
+    Detects unusual seasonal patterns by comparing a year's temperature profile to a baseline year.
 
-# --- Frequency Counts ---
+    Args:
+        df (pd.DataFrame): The input DataFrame.
+        city (str): The city to analyze.
+        temperature_column (str): The name of the temperature column.
+        comparison_year (int): The year to use as a baseline for seasonal comparison.
 
-print("\nFrequency Counts for Month:\n", df['month'].value_counts().sort_index())
-print("\nFrequency Counts for Country:\n", df['Country'].value_counts().sort_values(ascending=False))  #Sort by frequency
-print("\nFrequency Counts for Country ID:\n", df['country_id'].value_counts().sort_values(ascending=False)) #Sort by frequency
+    Returns:
+        pd.DataFrame: A DataFrame containing months with significantly different temperatures compared to the baseline year.
+    """
+    city_data = df[df['City'] == city]
+    baseline_data = city_data[city_data['year'] == comparison_year].groupby('month')[temperature_column].mean()
+    current_data = city_data.groupby('month')[temperature_column].mean()
 
+    # Calculate the difference between each month's average temperature and the baseline
+    temperature_diff = current_data - baseline_data
 
-# --- Data Distribution Visualization ---
+    # Identify months where the temperature difference is significant (e.g., using a threshold)
+    threshold = temperature_diff.std() * 2  # Example threshold: 2 standard deviations
 
-# Histograms
-plt.figure(figsize=(15, 5))
-plt.subplot(1, 3, 1)
-sns.histplot(df['year'], kde=True)
-plt.title('Distribution of Years')
+    # Filter the temperature differences to find the months that exceed the threshold
+    significant_diff_months = temperature_diff[abs(temperature_diff) > threshold]
+    
+    return significant_diff_months
 
-plt.subplot(1, 3, 2)
-sns.histplot(df['Latitude_parsed'], kde=True)
-plt.title('Distribution of Latitude')
+def detect_correlation_anomalies(df, temperature_column='AverageTemperatureFahr'):
+    """
+    Detects correlation-based anomalies by comparing temperature to latitude.
 
-plt.subplot(1, 3, 3)
-sns.histplot(df['Longitude_parsed'], kde=True)
-plt.title('Distribution of Longitude')
+    Args:
+        df (pd.DataFrame): The input DataFrame.
+        temperature_column (str): The name of the temperature column.
 
-plt.tight_layout()
-plt.show()
+    Returns:
+        pd.DataFrame: A DataFrame containing data points with temperatures significantly deviating from the expected latitude-temperature relationship.
+    """
+    # Convert latitude to numeric and handle 'N' and 'S'
+    df['LatitudeNumeric'] = df['Latitude'].str.replace('N', '').str.replace('S', '-').astype(float)
 
+    # Linear regression model
+    slope, intercept, r_value, p_value, std_err = stats.linregress(df['LatitudeNumeric'], df[temperature_column])
 
-# Box Plots
-plt.figure(figsize=(15, 5))
-plt.subplot(1, 3, 1)
-sns.boxplot(x=df['year'])
-plt.title('Boxplot of Years')
+    # Calculate expected temperature based on the linear model
+    df['ExpectedTemperature'] = intercept + slope * df['LatitudeNumeric']
 
-plt.subplot(1, 3, 2)
-sns.boxplot(x=df['Latitude_parsed'])
-plt.title('Boxplot of Latitude')
+    # Calculate residuals (difference between actual and expected)
+    df['Residuals'] = df[temperature_column] - df['ExpectedTemperature']
 
-plt.subplot(1, 3, 3)
-sns.boxplot(x=df['Longitude_parsed'])
-plt.title('Boxplot of Longitude')
+    # Define anomaly threshold based on standard deviation of residuals
+    threshold = df['Residuals'].std() * 2  # Example: 2 standard deviations
 
-plt.tight_layout()
-plt.show()
-
-
-# --- Time Series Analysis (Basic) ---
-
-# Aggregate data by year
-records_per_year = df['year'].value_counts().sort_index()
-
-# Plotting records per year
-plt.figure(figsize=(12, 6))
-records_per_year.plot(kind='line')
-plt.title('Number of Records per Year')
-plt.xlabel('Year')
-plt.ylabel('Number of Records')
-plt.grid(True)
-plt.show()
-
-# --- Correlation Analysis ---
-
-correlation_matrix = df[['Latitude_parsed', 'Longitude_parsed']].corr()
-print("\nCorrelation Matrix:\n", correlation_matrix)
-
-# --- Country Consistency Check ---
-country_consistency = df.groupby('country_id')['Country'].nunique()
-inconsistent_countries = country_consistency[country_consistency > 1]
-
-if not inconsistent_countries.empty:
-    print("\nWARNING: Inconsistent country names found for the following country IDs:")
-    print(inconsistent_countries)
-else:
-    print("\nCountry names are consistent across country IDs.")
-
-# --- Anomaly Detection (Basic - Record Counts per Year) ---
-# Identify years with significantly lower record counts
-
-mean_records = records_per_year.mean()
-std_records = records_per_year.std()
-threshold = mean_records - 2 * std_records  # Define a threshold (e.g., 2 standard deviations below the mean)
-
-anomalous_years = records_per_year[records_per_year < threshold]
-
-if not anomalous_years.empty:
-    print("\nPotentially Anomalous Years (Low Record Counts):\n", anomalous_years)
-else:
-    print("\nNo significantly anomalous years found based on record counts.")
+    # Identify anomalies
+    anomalies = df[abs(df['Residuals']) > threshold]
+    return anomalies[['Date', 'City', 'Country', 'Latitude', temperature_column, 'ExpectedTemperature', 'Residuals']]
 
 
-# --- Geospatial Analysis Preparation (Example) ---
-# Requires a library like geopandas.  This is just a placeholder.
-# import geopandas
-# from shapely.geometry import Point
+# --- Main Execution ---
 
-# # Create a GeoDataFrame
-# geometry = [Point(xy) for xy in zip(df['Longitude_parsed'], df['Latitude_parsed'])]
-# gdf = geopandas.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326") # WGS 84 coordinate system
+# 1. Missing Data Anomalies
+missing_data_anomalies = detect_missing_data_anomalies(df, 'AverageTemperatureFahr')
+print("\nYears with high missing temperature data:", missing_data_anomalies)
 
-# # Now you can perform spatial operations with geopandas.
-# # For example, plotting the points on a map:
-# # gdf.plot()
-# # plt.show()
+# 2. High Uncertainty Regions
+high_uncertainty_regions = detect_high_uncertainty_regions(df)
+print("\nCities/Countries with high temperature uncertainty:", high_uncertainty_regions)
+
+# 3. Temperature Spikes/Dips (Example for one city)
+city_to_analyze = 'Chicago' #Choose a city
+temperature_spikes = detect_temperature_spikes(df, city_to_analyze)
+print(f"\nTemperature spikes/dips in {city_to_analyze}:\n", temperature_spikes)
+
+# 4. Unusual Seasonal Patterns (Example for one city)
+unusual_seasons = detect_unusual_seasonal_patterns(df, city_to_analyze)
+print(f"\nUnusual seasonal patterns in {city_to_analyze}:\n", unusual_seasons)
+
+# 5. Correlation-Based Anomalies
+correlation_anomalies = detect_correlation_anomalies(df)
+print("\nCorrelation-based temperature anomalies:\n", correlation_anomalies)
+
+# --- Visualization (Optional) ---
+# Example: Plot temperature data for Chicago with moving average and thresholds
+if not temperature_spikes.empty: #Check if there are spikes to plot
+    city_data = df[df['City'] == city_to_analyze].sort_values('Date').set_index('Date')
+    city_data['MovingAverage'] = city_data['AverageTemperatureFahr'].rolling(window=30, center=True).mean()
+    city_data['StdDev'] = city_data['AverageTemperatureFahr'].rolling(window=30, center=True).std()
+    city_data['UpperThreshold'] = city_data['MovingAverage'] + 3 * city_data['StdDev']
+    city_data['LowerThreshold'] = city_data['MovingAverage'] - 3 * city_data['StdDev']
+
+    plt.figure(figsize=(12, 6))
+    plt.plot(city_data['AverageTemperatureFahr'], label='Temperature')
+    plt.plot(city_data['MovingAverage'], label='Moving Average')
+    plt.plot(city_data['UpperThreshold'], label='Upper Threshold', linestyle='--')
+    plt.plot(city_data['LowerThreshold'], label='Lower Threshold', linestyle='--')
+    plt.scatter(temperature_spikes['Date'], temperature_spikes['AverageTemperatureFahr'], color='red', label='Spikes/Dips')
+    plt.title(f'Temperature Anomalies in {city_to_analyze}')
+    plt.xlabel('Date')
+    plt.ylabel('Temperature (Fahrenheit)')
+    plt.legend()
+    plt.show()
+
+# Example: Scatter plot of Latitude vs Temperature, highlighting correlation anomalies
+if not correlation_anomalies.empty: #Check if there are correlation anomalies to plot
+    plt.figure(figsize=(10, 6))
+    plt.scatter(df['LatitudeNumeric'], df['AverageTemperatureFahr'], label='Data Points', alpha=0.5)
+    plt.scatter(correlation_anomalies['LatitudeNumeric'], correlation_anomalies['AverageTemperatureFahr'], color='red', label='Anomalies')
+    plt.plot(df['LatitudeNumeric'], df['ExpectedTemperature'], color='green', label='Regression Line')
+    plt.xlabel('Latitude')
+    plt.ylabel('Average Temperature (Fahrenheit)')
+    plt.title('Latitude vs. Temperature with Correlation Anomalies')
+    plt.legend()
+    plt.grid(True)
+    plt.show()

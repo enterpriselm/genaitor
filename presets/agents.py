@@ -169,7 +169,6 @@ linkedin_agent = Agent(
     llm_provider=provider
 )
 
-
 summarization_agent = Agent(
     role=AgentRole.SPECIALIST,
     tasks=[summarization_task],
@@ -246,6 +245,7 @@ destination_selection_agent = Agent(
     tasks=[destination_selection_task],
     llm_provider=provider
 )
+
 budget_estimation_agent = Agent(
     role=AgentRole.SPECIALIST,
     tasks=[budget_estimation_task],

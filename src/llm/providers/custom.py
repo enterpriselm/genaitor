@@ -7,19 +7,22 @@ class CustomServerConfig(LLMConfig):
         self,
         base_url: str,
         headers: Optional[Dict[str, str]] = None,
+        tokens: Optional[Dict[str, str]] = None,
         timeout: int = 30,
         **kwargs
     ):
         super().__init__(**kwargs)
         self.base_url = base_url
         self.headers = headers or {}
+        self.tokens = tokens or {}
         self.timeout = timeout
-
+        
 class CustomServerProvider(LLMProvider):
     def __init__(self, config: CustomServerConfig):
         super().__init__(config)
         self.session = requests.Session()
         self.session.headers.update(config.headers)
+        self.session.cookies.update(config.tokens)
 
     def generate(self, prompt: str, **kwargs) -> str:
         try:

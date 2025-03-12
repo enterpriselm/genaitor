@@ -36,9 +36,9 @@ async def main():
     
     # Process each question
     for question in questions:
-        print(f"\nQuestion: {question}")
+        print(f"\nQuestion: \n{question}")
         print("=" * 80)
-        
+        print('\n')
         try:
             result = await orchestrator.process_request(question, flow_name='default_flow')
             
@@ -46,21 +46,18 @@ async def main():
                 if isinstance(result["content"], dict):
                     content = result["content"].get("gemini")
                     if content and content.success:
-                        print("\nResponse:")
+                        print("\nResponse:\n")
                         print("-" * 80)
-                        
-                        # Formata o texto removendo TaskResult
+                        print("\n")
                         formatted_text = content.content.strip()
                         
-                        # Remove marcadores Markdown desnecessários se desejar
                         formatted_text = formatted_text.replace("**", "")
                         
-                        # Imprime com indentação adequada
                         for line in formatted_text.split('\n'):
-                            if line.strip():  # Ignora linhas vazias
+                            if line.strip():
                                 print(line)
                             else:
-                                print()  # Mantém espaçamento entre parágrafos
+                                print()
                     else:
                         print("Empty response received")
                 else:

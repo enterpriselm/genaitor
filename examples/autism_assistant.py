@@ -22,14 +22,17 @@ async def main():
     hyperfocus = 'Soccer'
     question = 'What is Data Science?'
     input_data = f"Hyperfocus: {hyperfocus}/nQuestion: {question}"
+    print(input_data.replace('/n','\n'))
+    print('\n')
     try:
         result = await orchestrator.process_request(input_data, flow_name='default_flow')
         if result["success"]:
             if isinstance(result["content"], dict):
                 content = result["content"].get("gemini")
                 if content and content.success:
-                    print("\nResponse:")
+                    print("\nResponse:\n")
                     print("-" * 80)
+                    print('\n')
                     print(content.content.strip())
                 else:
                     print("Empty response received")

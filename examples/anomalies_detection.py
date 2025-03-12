@@ -35,6 +35,7 @@ async def main():
                     filename=f'examples/files/anomaly_detection_{i}.py'
                     with open(filename,'w') as f:
                         f.write(python_code.partition('python')[2])
+                    print(python_code.partition('python')[2])
         else:
             print(f"\nError: {result['error']}")
     

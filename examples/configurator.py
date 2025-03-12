@@ -38,9 +38,32 @@ async def main():
         result = await orchestrator.process_request(customer_preferences, flow_name='car_purchase_flow')
         
         if result["success"]:
-            proposal_text = result['content']['review_agent'].content.strip()
+            preferences_text = result['content']['preferences_agent'].content.strip()
+            payment_text = result['content']['payment_agent'].content.strip()
+            proposal_text = result['content']['proposal_agent'].content.strip()
+            review_text = result['content']['review_agent'].content.strip()
+            
+            print("Preferences Text")
+            print('\n')
+            print(preferences_text)
+
+            print("Payment Text")
+            print('\n')
+            print(payment_text)
+
+            print("Proposal Text")
+            print('\n')
+            print(proposal_text)
+
+            print("Review Text")
+            print('\n')
+            print(review_text)
+
             with open('examples/files/final_proposal.txt', 'w') as f:
-                f.write(proposal_text)
+                f.write(review_text)
+
+            
+            
         else:
             print(f"\nError: {result['error']}")
     
