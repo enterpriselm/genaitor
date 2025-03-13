@@ -103,6 +103,7 @@ th {
 p,
 a,
 label,
+button,
 td {
 	font-style: normal;
 	font-weight: 400;
@@ -126,4 +127,35 @@ a {
 
 button {
 	transition: all 0.5s;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+	label {
+		font-weight: bold;
+	}
+
+	select,
+	input {
+		color: var(--darker);
+
+		&::placeholder {
+			color: var(--gray);
+		}
+
+		&:focus,
+		&:active {
+			outline: none;
+			box-shadow: none;
+			border-color: var(--primary);
+		}
+	}
+
+	.action-button {
+		display: flex;
+		justify-content: flex-end;
+	}
 }
