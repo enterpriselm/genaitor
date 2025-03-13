@@ -2,6 +2,7 @@
 
 import { Tab, Tabs } from "react-bootstrap"
 import { ContentSection } from "./styled"
+import AgentTest from "@/components/AgentTest"
 
 export default function Index() {
 	return (
@@ -13,7 +14,9 @@ export default function Index() {
 					id="tabs-content-option-genaitor"
 					className="tabs-genaitor"
 				>
-					<Tab eventKey="agents" title="Use Preset Agents"></Tab>
+					<Tab eventKey="agents" title="Use Preset Agents">
+						<AgentTest />
+					</Tab>
 					<Tab eventKey="flows" title="Use Preset Flows"></Tab>
 					<Tab eventKey="create-flow" title="Create new Flow"></Tab>
 					<Tab eventKey="create-agent" title="Create New Task and Agent"></Tab>

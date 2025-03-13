@@ -8,8 +8,16 @@
 		"start": "next start",
 		"lint": "next lint"
 	},
+	"authors": [
+		{
+			"name": "Atyson Jaime",
+			"url": "https://github.com/atysonjaime",
+			"email": "atysonjaimedev@gmail.com"
+		}
+	],
 	"engines": {
-		"node": ">=20"
+		"node": ">=22",
+		"npm": ">=10"
 	},
 	"dependencies": {
 		"axios": "^1.8.3",
@@ -18,7 +26,9 @@
 		"react": "^19.0.0",
 		"react-bootstrap": "^2.10.9",
 		"react-dom": "^19.0.0",
+		"react-markdown": "^10.1.0",
 		"react-toastify": "^11.0.5",
+		"remark-gfm": "^4.0.1",
 		"styled-components": "^6.1.15"
 	},
 	"devDependencies": {
