@@ -14,6 +14,12 @@ qa_agent = Agent(
     llm_provider=provider
 )
 
+debugging_agent = Agent(
+    role=AgentRole.SPECIALIST,
+    tasks=[debugging_task],
+    llm_provider=provider
+)
+
 autism_agent = Agent(
     role=AgentRole.SPECIALIST,
     tasks=[autism_task],

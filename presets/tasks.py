@@ -23,6 +23,13 @@ numerical_method_comparison_task = GeneralTask(
     llm_provider=provider
 )
 
+debugging_task = GeneralTask(
+    description="Analyze system logs and code execution traces to identify and fix bugs in the given code.",
+    goal="Automatically detect errors in the provided code based on system logs and suggest corrections.",
+    output_format="Corrected version of the code with explanations of the fixes.",
+    llm_provider=provider
+)
+
 dimensionality_reduction_task = GeneralTask(
     description="Use variational autoencoders to reduce the dimensionality of problems related to partial differential equations (PDEs) in engineering.",
     goal="Apply variational autoencoders to reduce the dimensionality of PDE problems while preserving essential information.",

@@ -1,40 +1,22 @@
-// src/components/InitialScreen.tsx
 import React from "react";
 import { Link } from "react-router-dom";
 
 function InitialScreen() {
   return (
-    <div className="min-h-screen bg-gray-100 p-4 flex items-center justify-center">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-semibold mb-6 text-center">
-          GenAItor
-        </h1>
-        <div className="grid grid-cols-1 gap-4">
-          <Link
-            to="/agents"
-            className="py-2 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white font-semibold text-center"
-          >
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold mb-4">GenAltor</h1>
+        <div>
+          <Link to="/agents" className="text-blue-500 hover:underline mr-4">
             Use Preseted Agents
           </Link>
-          <br></br>
-          <Link
-            to="/flows"
-            className="py-2 px-4 bg-indigo-600 hover:bg-indigo-700 rounded-md text-white font-semibold text-center"
-          >
+          <Link to="/flows" className="text-blue-500 hover:underline mr-4">
             Use Preseted Flows
           </Link>
-          <br></br>
-          <Link
-            to="/flows/create"
-            className="py-2 px-4 bg-green-600 hover:bg-green-700 rounded-md text-white font-semibold text-center"
-          >
+          <Link to="/flows/create" className="text-blue-500 hover:underline mr-4">
             Create new Flow
           </Link>
-          <br></br>
-          <Link
-            to="/agents/create"
-            className="py-2 px-4 bg-green-600 hover:bg-green-700 rounded-md text-white font-semibold text-center"
-          >
+          <Link to="/agents/create" className="text-blue-500 hover:underline">
             Create New Task and Agent
           </Link>
         </div>

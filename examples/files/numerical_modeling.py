@@ -1,4 +1,4 @@
-```python
+
 import numpy as np
 import scipy.sparse as sparse
 import scipy.sparse.linalg as splinalg
@@ -136,4 +136,3 @@ if __name__ == '__main__':
     plt.title("Temperature Distribution")
     plt.colorbar()
     plt.show()
-```

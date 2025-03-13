@@ -97,11 +97,20 @@ const AgentTestScreen: React.FC<AgentTestScreenProps> = () => {
         {error && <p className="text-red-500 mt-2 text-center">{error}</p>}
 
         {response && (
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <h2 className="text-lg font-semibold mb-2">Response:</h2>
-            <ReactMarkdown remarkPlugins={[remarkGfm]} children={response} />
-          </div>
-        )}
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <h2 className="text-lg font-semibold mb-2">Response:</h2>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} children={response} />
+                    
+                    {response.includes("```") && (
+                      <button
+                        className="mt-2 py-2 px-4 bg-green-600 hover:bg-green-700 rounded-md text-white font-semibold"
+                        onClick={() => console.log("Debugging Code:", response)}
+                      >
+                        Debug Code
+                      </button>
+                    )}
+                  </div>
+                )}
       </div>
     </div>
   );
