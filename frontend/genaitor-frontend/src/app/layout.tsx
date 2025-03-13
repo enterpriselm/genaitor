@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css"
 import StyledComponentsRegistry from "./registry"
 import { ToastContainer } from "react-toastify"
 import React from "react"
+import Header from "@/components/Header"
 
 const nunito = Nunito({
 	subsets: ["latin"],
@@ -41,7 +42,12 @@ export default function RootLayout({
 					theme="colored"
 					limit={1}
 				/>
-				<StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+				<StyledComponentsRegistry>
+					<main>
+						<Header />
+						{children}
+					</main>
+				</StyledComponentsRegistry>
 			</body>
 		</html>
 	)
