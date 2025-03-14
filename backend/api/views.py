@@ -11,7 +11,6 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 # Adicionar o caminho do projeto ao sys.path para importar os módulos
-# Corrigindo o path para adicionar o diretório raiz do projeto (dois níveis acima)
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(project_root)
 
@@ -19,6 +18,8 @@ sys.path.append(project_root)
 from src.core import Orchestrator, Flow, ExecutionMode
 from presets.agents import *
 from presets.tasks import *
+from presets.tasks_objects import *
+from presets.providers import *
 
 # Mapeamento dos agentes disponíveis
 AGENT_MAPPING = {
@@ -330,10 +331,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             # Salvar a tarefa no banco de dados
             task = serializer.save()
             
-            try:
-                # Importar o GeneralTask e provider
-                from presets.tasks_objects import GeneralTask
-                from presets.providers import gemini_provider
+            try:              
                 provider = gemini_provider()
                 
                 # Criar uma instância de GeneralTask
@@ -349,7 +347,6 @@ class TaskViewSet(viewsets.ModelViewSet):
                 globals()[task_var_name] = general_task
                 
                 # Se o módulo de tarefas estiver acessível, também registrar lá
-                import sys
                 if 'presets.tasks' in sys.modules:
                     import presets.tasks
                     setattr(presets.tasks, task_var_name, general_task)
@@ -385,220 +382,220 @@ class TaskViewSet(viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    @swagger_auto_schema(
-        operation_description="Obtém uma tarefa específica por ID",
-        responses={
-            200: openapi.Response("Detalhes da tarefa", TaskSerializer),
-            404: openapi.Response("Tarefa não encontrada", 
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'error': openapi.Schema(type=openapi.TYPE_STRING)
-                    }
-                )
-            )
-        }
-    )
-    def retrieve(self, request, pk=None):
-        """Obtém uma tarefa específica."""
-        try:
-            task = TaskModel.objects.get(pk=pk)
-            serializer = self.get_serializer(task)
-            return DRFResponse(serializer.data)
-        except TaskModel.DoesNotExist:
-            return DRFResponse(
-                {"error": f"Tarefa com ID {pk} não encontrada"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+    # @swagger_auto_schema(
+    #     operation_description="Obtém uma tarefa específica por ID",
+    #     responses={
+    #         200: openapi.Response("Detalhes da tarefa", TaskSerializer),
+    #         404: openapi.Response("Tarefa não encontrada", 
+    #             schema=openapi.Schema(
+    #                 type=openapi.TYPE_OBJECT,
+    #                 properties={
+    #                     'error': openapi.Schema(type=openapi.TYPE_STRING)
+    #                 }
+    #             )
+    #         )
+    #     }
+    # )
+    # def retrieve(self, request, pk=None):
+    #     """Obtém uma tarefa específica."""
+    #     try:
+    #         task = TaskModel.objects.get(pk=pk)
+    #         serializer = self.get_serializer(task)
+    #         return DRFResponse(serializer.data)
+    #     except TaskModel.DoesNotExist:
+    #         return DRFResponse(
+    #             {"error": f"Tarefa com ID {pk} não encontrada"},
+    #             status=status.HTTP_404_NOT_FOUND
+    #         )
     
-    @swagger_auto_schema(
-        operation_description="Testa a execução de uma tarefa com dados de entrada",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'input_data': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="Dados de entrada para teste da tarefa"
-                )
-            },
-            required=['input_data']
-        ),
-        responses={
-            200: openapi.Response("Resultado da execução", ResponseSerializer),
-            400: openapi.Response("Dados inválidos", 
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT)
-            ),
-            404: openapi.Response("Tarefa não encontrada", 
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'error': openapi.Schema(type=openapi.TYPE_STRING)
-                    }
-                )
-            )
-        }
-    )
-    @action(detail=True, methods=['post'])
-    def test(self, request, pk=None):
-        """Testa a execução de uma tarefa com dados de entrada."""
-        try:
-            task = TaskModel.objects.get(pk=pk)
-        except TaskModel.DoesNotExist:
-            return DRFResponse(
-                {"error": f"Tarefa com ID {pk} não encontrada"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+    # @swagger_auto_schema(
+    #     operation_description="Testa a execução de uma tarefa com dados de entrada",
+    #     request_body=openapi.Schema(
+    #         type=openapi.TYPE_OBJECT,
+    #         properties={
+    #             'input_data': openapi.Schema(
+    #                 type=openapi.TYPE_STRING,
+    #                 description="Dados de entrada para teste da tarefa"
+    #             )
+    #         },
+    #         required=['input_data']
+    #     ),
+    #     responses={
+    #         200: openapi.Response("Resultado da execução", ResponseSerializer),
+    #         400: openapi.Response("Dados inválidos", 
+    #             schema=openapi.Schema(type=openapi.TYPE_OBJECT)
+    #         ),
+    #         404: openapi.Response("Tarefa não encontrada", 
+    #             schema=openapi.Schema(
+    #                 type=openapi.TYPE_OBJECT,
+    #                 properties={
+    #                     'error': openapi.Schema(type=openapi.TYPE_STRING)
+    #                 }
+    #             )
+    #         )
+    #     }
+    # )
+    # @action(detail=True, methods=['post'])
+    # def test(self, request, pk=None):
+    #     """Testa a execução de uma tarefa com dados de entrada."""
+    #     try:
+    #         task = TaskModel.objects.get(pk=pk)
+    #     except TaskModel.DoesNotExist:
+    #         return DRFResponse(
+    #             {"error": f"Tarefa com ID {pk} não encontrada"},
+    #             status=status.HTTP_404_NOT_FOUND
+    #         )
         
-        # Validação dos dados de entrada
-        input_data = request.data.get('input_data')
-        if not input_data:
-            return DRFResponse(
-                {"error": "O campo 'input_data' é obrigatório"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    #     # Validação dos dados de entrada
+    #     input_data = request.data.get('input_data')
+    #     if not input_data:
+    #         return DRFResponse(
+    #             {"error": "O campo 'input_data' é obrigatório"},
+    #             status=status.HTTP_400_BAD_REQUEST
+    #         )
             
-        try:
-            # Importar o provider padrão
-            from presets.providers import gemini_provider
-            provider = gemini_provider()
+    #     try:
+    #         # Importar o provider padrão
+    #         from presets.providers import gemini_provider
+    #         provider = gemini_provider()
             
-            # Converter para GeneralTask
-            general_task = task.to_general_task(provider)
+    #         # Converter para GeneralTask
+    #         general_task = task.to_general_task(provider)
             
-            # Executar a tarefa
-            result = general_task.execute(input_data)
+    #         # Executar a tarefa
+    #         result = general_task.execute(input_data)
             
-            # Retornar o resultado
-            response_obj = ResponseModel(response=result.content)
-            response_serializer = ResponseSerializer(response_obj)
+    #         # Retornar o resultado
+    #         response_obj = ResponseModel(response=result.content)
+    #         response_serializer = ResponseSerializer(response_obj)
             
-            return DRFResponse(response_serializer.data)
+    #         return DRFResponse(response_serializer.data)
                 
-        except Exception as e:
-            return DRFResponse(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+    #     except Exception as e:
+    #         return DRFResponse(
+    #             {"error": str(e)},
+    #             status=status.HTTP_500_INTERNAL_SERVER_ERROR
+    #         )
     
-    @swagger_auto_schema(
-        operation_description="Atualiza uma tarefa existente",
-        request_body=TaskSerializer,
-        responses={
-            200: openapi.Response("Tarefa atualizada", TaskSerializer),
-            400: openapi.Response("Dados inválidos", 
-                schema=openapi.Schema(type=openapi.TYPE_OBJECT)
-            ),
-            404: openapi.Response("Tarefa não encontrada", 
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'error': openapi.Schema(type=openapi.TYPE_STRING)
-                    }
-                )
-            )
-        }
-    )
-    def update(self, request, pk=None):
-        """Atualiza uma tarefa existente."""
-        try:
-            task = TaskModel.objects.get(pk=pk)
-        except TaskModel.DoesNotExist:
-            return DRFResponse(
-                {"error": f"Tarefa com ID {pk} não encontrada"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+    # @swagger_auto_schema(
+    #     operation_description="Atualiza uma tarefa existente",
+    #     request_body=TaskSerializer,
+    #     responses={
+    #         200: openapi.Response("Tarefa atualizada", TaskSerializer),
+    #         400: openapi.Response("Dados inválidos", 
+    #             schema=openapi.Schema(type=openapi.TYPE_OBJECT)
+    #         ),
+    #         404: openapi.Response("Tarefa não encontrada", 
+    #             schema=openapi.Schema(
+    #                 type=openapi.TYPE_OBJECT,
+    #                 properties={
+    #                     'error': openapi.Schema(type=openapi.TYPE_STRING)
+    #                 }
+    #             )
+    #         )
+    #     }
+    # )
+    # def update(self, request, pk=None):
+    #     """Atualiza uma tarefa existente."""
+    #     try:
+    #         task = TaskModel.objects.get(pk=pk)
+    #     except TaskModel.DoesNotExist:
+    #         return DRFResponse(
+    #             {"error": f"Tarefa com ID {pk} não encontrada"},
+    #             status=status.HTTP_404_NOT_FOUND
+    #         )
         
-        serializer = self.get_serializer(task, data=request.data)
+    #     serializer = self.get_serializer(task, data=request.data)
         
-        if serializer.is_valid():
-            # Salvar atualização no banco
-            updated_task = serializer.save()
+    #     if serializer.is_valid():
+    #         # Salvar atualização no banco
+    #         updated_task = serializer.save()
             
-            try:
-                # Importar o GeneralTask e provider
-                from presets.tasks_objects import GeneralTask
-                from presets.providers import gemini_provider
-                provider = gemini_provider()
+    #         try:
+    #             # Importar o GeneralTask e provider
+    #             from presets.tasks_objects import GeneralTask
+    #             from presets.providers import gemini_provider
+    #             provider = gemini_provider()
                 
-                # Criar ou atualizar a instância de GeneralTask
-                general_task = GeneralTask(
-                    description=updated_task.description,
-                    goal=updated_task.goal,
-                    output_format=updated_task.output_format,
-                    llm_provider=provider
-                )
+    #             # Criar ou atualizar a instância de GeneralTask
+    #             general_task = GeneralTask(
+    #                 description=updated_task.description,
+    #                 goal=updated_task.goal,
+    #                 output_format=updated_task.output_format,
+    #                 llm_provider=provider
+    #             )
                 
-                # Atualizar a tarefa no módulo global
-                task_var_name = f"{updated_task.name}_task"
-                globals()[task_var_name] = general_task
+    #             # Atualizar a tarefa no módulo global
+    #             task_var_name = f"{updated_task.name}_task"
+    #             globals()[task_var_name] = general_task
                 
-                # Se o módulo de tarefas estiver acessível, também atualizar lá
-                import sys
-                if 'presets.tasks' in sys.modules:
-                    import presets.tasks
-                    setattr(presets.tasks, task_var_name, general_task)
+    #             # Se o módulo de tarefas estiver acessível, também atualizar lá
+    #             import sys
+    #             if 'presets.tasks' in sys.modules:
+    #                 import presets.tasks
+    #                 setattr(presets.tasks, task_var_name, general_task)
                 
-                return DRFResponse(serializer.data)
-            except Exception as e:
-                # Se falhar ao atualizar como GeneralTask, ainda retornamos sucesso
-                # mas logamos o erro para debugging
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Erro ao atualizar task como GeneralTask: {str(e)}")
+    #             return DRFResponse(serializer.data)
+    #         except Exception as e:
+    #             # Se falhar ao atualizar como GeneralTask, ainda retornamos sucesso
+    #             # mas logamos o erro para debugging
+    #             import logging
+    #             logger = logging.getLogger(__name__)
+    #             logger.error(f"Erro ao atualizar task como GeneralTask: {str(e)}")
                 
-                return DRFResponse(
-                    {
-                        **serializer.data,
-                        "warning": "A tarefa foi atualizada no banco de dados, mas não foi possível atualizar sua instância GeneralTask no sistema."
-                    }
-                )
+    #             return DRFResponse(
+    #                 {
+    #                     **serializer.data,
+    #                     "warning": "A tarefa foi atualizada no banco de dados, mas não foi possível atualizar sua instância GeneralTask no sistema."
+    #                 }
+    #             )
             
-        return DRFResponse(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+    #     return DRFResponse(
+    #         serializer.errors,
+    #         status=status.HTTP_400_BAD_REQUEST
+    #     )
     
-    @swagger_auto_schema(
-        operation_description="Exclui uma tarefa existente",
-        responses={
-            204: openapi.Response("Tarefa excluída com sucesso"),
-            404: openapi.Response("Tarefa não encontrada", 
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'error': openapi.Schema(type=openapi.TYPE_STRING)
-                    }
-                )
-            )
-        }
-    )
-    def destroy(self, request, pk=None):
-        """Exclui uma tarefa específica."""
-        try:
-            task = TaskModel.objects.get(pk=pk)
+    # @swagger_auto_schema(
+    #     operation_description="Exclui uma tarefa existente",
+    #     responses={
+    #         204: openapi.Response("Tarefa excluída com sucesso"),
+    #         404: openapi.Response("Tarefa não encontrada", 
+    #             schema=openapi.Schema(
+    #                 type=openapi.TYPE_OBJECT,
+    #                 properties={
+    #                     'error': openapi.Schema(type=openapi.TYPE_STRING)
+    #                 }
+    #             )
+    #         )
+    #     }
+    # )
+    # def destroy(self, request, pk=None):
+    #     """Exclui uma tarefa específica."""
+    #     try:
+    #         task = TaskModel.objects.get(pk=pk)
             
-            # Remover a instância GeneralTask global, se existir
-            task_var_name = f"{task.name}_task"
-            if task_var_name in globals():
-                del globals()[task_var_name]
+    #         # Remover a instância GeneralTask global, se existir
+    #         task_var_name = f"{task.name}_task"
+    #         if task_var_name in globals():
+    #             del globals()[task_var_name]
             
-            # Remover do módulo de tarefas, se existir
-            try:
-                import sys
-                if 'presets.tasks' in sys.modules:
-                    import presets.tasks
-                    if hasattr(presets.tasks, task_var_name):
-                        delattr(presets.tasks, task_var_name)
-            except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Erro ao remover GeneralTask ao excluir: {str(e)}")
+    #         # Remover do módulo de tarefas, se existir
+    #         try:
+    #             import sys
+    #             if 'presets.tasks' in sys.modules:
+    #                 import presets.tasks
+    #                 if hasattr(presets.tasks, task_var_name):
+    #                     delattr(presets.tasks, task_var_name)
+    #         except Exception as e:
+    #             import logging
+    #             logger = logging.getLogger(__name__)
+    #             logger.error(f"Erro ao remover GeneralTask ao excluir: {str(e)}")
             
-            # Excluir a tarefa do banco de dados
-            task.delete()
-            return DRFResponse(status=status.HTTP_204_NO_CONTENT)
-        except TaskModel.DoesNotExist:
-            return DRFResponse(
-                {"error": f"Tarefa com ID {pk} não encontrada"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+    #         # Excluir a tarefa do banco de dados
+    #         task.delete()
+    #         return DRFResponse(status=status.HTTP_204_NO_CONTENT)
+    #     except TaskModel.DoesNotExist:
+    #         return DRFResponse(
+    #             {"error": f"Tarefa com ID {pk} não encontrada"},
+    #             status=status.HTTP_404_NOT_FOUND
+    #         )
