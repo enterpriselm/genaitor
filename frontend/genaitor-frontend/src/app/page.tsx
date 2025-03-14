@@ -3,7 +3,7 @@
 import { Tab, Tabs } from "react-bootstrap"
 import { ContentSection } from "./styled"
 import AgentTest from "@/components/AgentTest"
-
+import AgentCreate from "@/components/AgentCreate"
 export default function Index() {
 	return (
 		<ContentSection>
@@ -19,7 +19,9 @@ export default function Index() {
 					</Tab>
 					<Tab eventKey="flows" title="Use Preset Flows"></Tab>
 					<Tab eventKey="create-flow" title="Create new Flow"></Tab>
-					<Tab eventKey="create-agent" title="Create New Task and Agent"></Tab>
+					<Tab eventKey="create-agent" title="Create New Task and Agent">
+						<AgentCreate />
+					</Tab>
 				</Tabs>
 			</div>
 		</ContentSection>
