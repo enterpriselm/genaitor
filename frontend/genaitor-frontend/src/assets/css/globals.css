@@ -27,7 +27,6 @@
 
 html,
 body {
-	overflow: hidden;
 	background-color: var(--light);
 	scroll-behavior: smooth !important;
 }
