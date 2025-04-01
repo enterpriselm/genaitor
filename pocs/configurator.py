@@ -5,8 +5,8 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.core import Orchestrator, Flow, ExecutionMode
-from presets.agents import preferences_agent, payment_agent, proposal_agent, review_agent
+from src.genaitor.core import Orchestrator, Flow, ExecutionMode
+from src.genaitor.presets.agents import preferences_agent, payment_agent, proposal_agent, review_agent
 
 def run_car_purchase(customer_preferences):
     async def main():

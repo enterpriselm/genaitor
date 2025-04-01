@@ -5,8 +5,8 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.core import Orchestrator, Flow, ExecutionMode
-from presets.agents import autism_agent
+from src.genaitor.core import Orchestrator, Flow, ExecutionMode
+from src.genaitor.presets.agents import autism_agent
 
 def process_request(hyperfocus, question):
     input_data = f"Hyperfocus: {hyperfocus}\nQuestion: {question}"

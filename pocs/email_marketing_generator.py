@@ -5,8 +5,8 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.core import Orchestrator, Flow, ExecutionMode
-from presets.agents import research_agent, content_agent, optimization_agent, personalization_agent
+from src.genaitor.core import Orchestrator, Flow, ExecutionMode
+from src.genaitor.presets.agents import research_agent, content_agent, optimization_agent, personalization_agent
 
 
 # Configuração da Orquestração

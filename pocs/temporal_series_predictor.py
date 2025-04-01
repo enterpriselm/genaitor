@@ -4,8 +4,8 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.core import Orchestrator, Flow, ExecutionMode
-from presets.agents import feature_selection_agent, signal_analysis_agent, residual_evaluation_agent, lstm_model_agent, lstm_residual_evaluation_agent
+from src.genaitor.core import Orchestrator, Flow, ExecutionMode
+from src.genaitor.presets.agents import feature_selection_agent, signal_analysis_agent, residual_evaluation_agent, lstm_model_agent, lstm_residual_evaluation_agent
 
 async def main():
     print("\nInitializing Time Series Analysis System...")

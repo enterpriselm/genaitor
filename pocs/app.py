@@ -1,6 +1,5 @@
 import streamlit as st
 import subprocess
-import sys
 
 st.set_page_config(page_title="Genaitor", page_icon="🤖", layout="centered")
 
@@ -20,6 +19,8 @@ apps = {
     "📊 PINN's Generator": "pocs/pinns.py",
     "📑 PPT and PDF Analyzer": "pocs/ppt_pdf_analyzer.py",
     "🛰️ Satellite Images Analyzer": "pocs/satellite_img_analyst.py",
+    "🧪 Scientific Machine Learning Helper": "pocs/sciml.py",
+    "📈 Time Series Forecasting Helper": "pocs/temporal_series_predictor.py",
     "🛡️ Websites Security Analyst": "pocs/security_analyst.py"
 }
 

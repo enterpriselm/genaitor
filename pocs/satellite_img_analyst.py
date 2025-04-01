@@ -7,8 +7,8 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.core import Orchestrator, Flow, ExecutionMode
-from presets.agents import (
+from src.genaitor.core import Orchestrator, Flow, ExecutionMode
+from src.genaitor.presets.agents import (
     disaster_analysis_agent, agro_analysis_agent, ecological_analysis_agent,
     air_quality_analysis_agent, vegetation_analysis_agent, soil_moisture_analysis_agent
 )

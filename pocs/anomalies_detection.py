@@ -6,10 +6,10 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.core import (
+from src.genaitor.core import (
     Orchestrator, Flow, ExecutionMode
 )
-from presets.agents import data_understanding_agent, statistics_agent, anomalies_detection_agent, data_analysis_agent
+from src.genaitor.presets.agents import data_understanding_agent, statistics_agent, anomalies_detection_agent, data_analysis_agent
 
 def process_file(file):
     df = pd.read_csv(file)
