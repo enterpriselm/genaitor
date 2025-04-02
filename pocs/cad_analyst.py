@@ -47,7 +47,7 @@ if st.button("Solve Problem"):
         problem_analysis, math_code, pinn_code = asyncio.run(process_problem(user_requirements, problem_description))
     
     st.subheader("Problem Analysis")
-    st.text(problem_analysis)
+    st.markdown(problem_analysis, unsafe_allow_html=True)
     
     st.subheader("Numerical Modelling Code")
     st.code(math_code, language='python')

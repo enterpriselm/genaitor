@@ -50,7 +50,7 @@ async def analyze_security(scraped_data):
                 context_pass=[True, True, True]
             )
         },
-        mode=ExecutionMode.SEQUENTIAL #Change to CONCURRENT if agents can run in parallel
+        mode=ExecutionMode.SEQUENTIAL
     )
     result = await orchestrator.process_request(scraped_data, flow_name='security_analysis_flow')
     return result
@@ -67,7 +67,7 @@ if st.button("Analyze"):
 
         if result["success"]:
             st.write("Security Analysis Results:")
-            st.json(result['content'])
+            st.markdown(result['content']['report_agent'].content)
         else:
             st.error(f"Error: {result['error']}")
     else:

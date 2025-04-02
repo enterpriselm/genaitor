@@ -9,7 +9,6 @@ from src.genaitor.core import Orchestrator, Flow, ExecutionMode
 from src.genaitor.presets.agents import research_agent, content_agent, optimization_agent, personalization_agent
 
 
-# Configuração da Orquestração
 def setup_orchestrator():
     return Orchestrator(
         agents={
@@ -35,23 +34,23 @@ async def generate_email(campaign_details):
     )
     return result
 
-st.title("📧 Gerador de E-mails de Marketing")
-st.write("Preencha os detalhes abaixo para gerar um e-mail de campanha otimizado.")
+st.title("📧 Marketing Email Generator")
+st.write("Fill in the details below to generate an optimized campaign email.")
 
-product = st.text_input("Produto", "Novo curso de Machine Learning")
-audience = st.text_input("Público-alvo", "Profissionais de tecnologia interessados em IA")
-goal = st.text_input("Objetivo", "Gerar leads e aumentar conversões")
+product = st.text_input("Product", "New Machine Learning course")
+audience = st.text_input("Target Audience", "Tech professionals interested in AI")
+goal = st.text_input("Goal", "Generate leads and increase conversions")
 
-if st.button("Gerar E-mail"):
+if st.button("Generate Email"):
     campaign_details = {
         "product": product,
         "audience": audience,
         "goal": goal
     }
-    with st.spinner("Gerando e-mail..."):
+    with st.spinner("Generating email..."):
         email_result = asyncio.run(generate_email(campaign_details))
         if email_result["success"]:
-            st.subheader("✉️ E-mail Final:")
-            st.write(email_result['content'])
+            st.subheader("✉️ Final Email:")
+            st.markdown(email_result['content']['personalization_agent'].content.strip(), unsafe_allow_html=True)
         else:
-            st.error(f"Erro: {email_result['error']}")
+            st.error(f"Error: {email_result['error']}")

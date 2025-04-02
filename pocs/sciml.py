@@ -548,7 +548,7 @@ async def main(
         for api_key in test_keys:
             try:
                 media_content = extract_file_content(api_key, file_path)
-                organized_context+=f"\nMedia File Information to analyze: {media_content}"
+                organized_context+=f"\nThis is the content of a media attached by user: \n{media_content}\n\nYou should also supply support for solving the problem using this content as reference."
             except:
                 continue
     expanded_context = await context_expansion(organized_context, provider)
@@ -564,21 +564,24 @@ async def main(
     output = f"**<span style='color: blue; font-size: 1.2em;'>Hi, welcome to SciML helper.</span>**\n\n"
     output += "<span style='color: green;'>Let's start trying to understand better your problem...</span>\n\n"
     output += f"<span style='color: black;'>This is the problem you want to solve:</span> \n\n<span style='color: purple;'>{organized_context.replace(framework_content, desired_framework)}</span>\n\n"
-    output += f"<span style='color: black;'>My Suggestion for solving the problem using this strategy is following those code steps:</span>\n\n<span style='color: orange;'>{solution}</span>\n\n"
+    output += f"<span style='color: black;'>My suggestion for solving the problem using this strategy is following these code steps:</span>\n\n"
+    output += f"<pre><code class='language-python'>{solution}</code></pre>\n\n"
     output += "<span style='color: black;'>\n\nFinally, here are some references for research\n:</span>"
 
     output+="<span style='color: black;'>\n\nGithub Repositories:\n\n</span>"
     cont=1
     for repository in repositories:
-        output+=f'{cont}. {repository}\n'
+        output+=f'{cont}. {repository}\n\n'
         cont+=1
-    output+="<span style='color: black;'>\nOpen Papers:\n\n</span>"                  
+        if cont == 11:
+            break
+    output+="<span style='color: black;'>\n\nOpen Papers:\n\n</span>"                  
     cont=1
     for i in range(len(papers['url'])):
         paper_name = papers['name'][i]
         url = papers['url'][i]
         abstract = papers['abstract'][i]
-        output+=f'{cont}. Name: {paper_name}\nURL: {url}\nAbstract: {abstract}\n'
+        output+=f'{cont}. Name: {paper_name}\n\nURL: {url}\n\nAbstract: {abstract}\n\n'
         cont+=1
         if cont == 11:
             break

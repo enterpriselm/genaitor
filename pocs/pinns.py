@@ -52,7 +52,7 @@ def run_orchestration(user_input, execution_mode):
                         agents=["solver_agent", "pinn_agent", "optimizer_agent"], 
                         context_pass=[True, True, True],
                         orchestrator_agent="orchestrator",
-                        validator_agent="validatoxr"
+                        validator_agent="validator"
                     )
                 },
                 mode=ExecutionMode.ADAPTIVE

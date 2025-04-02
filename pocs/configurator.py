@@ -62,10 +62,7 @@ if st.button("Find My Car"):
         result = run_car_purchase(customer_preferences)
         
         if result["success"]:
-            st.subheader("Recommendations:")
-            st.write(f"**Preferences Analysis:** {result['content']['preferences_agent'].content.strip()}")
-            st.write(f"**Payment Options:** {result['content']['payment_agent'].content.strip()}")
-            st.write(f"**Proposed Cars:** {result['content']['proposal_agent'].content.strip()}")
-            st.write(f"**Final Review:** {result['content']['review_agent'].content.strip()}")
+            st.markdown(f"**Proposed Cars:** {result['content']['proposal_agent'].content.strip()}", unsafe_allow_html=True)
+            st.markdown(f"**Final Review:** {result['content']['review_agent'].content.strip()}", unsafe_allow_html=True)
         else:
             st.error(f"Error: {result['error']}")
