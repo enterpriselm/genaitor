@@ -1,0 +1,160 @@
+:root {
+	--font-nunito: "Nunito", sans-serif;
+
+	--light: #f3f4f6;
+	--white: #fff;
+	--gray: #bfbfbf;
+	--dark: #1f2937;
+	--darker: #111827;
+	--primary: #3b82f6;
+	--primary-dark: #2563eb;
+
+	--tam-h1: clamp(4.25rem, 3.0694rem + 3.7778vw, 6.375rem);
+	--tam-h2: clamp(3.4375rem, 3.125rem + 1vw, 4rem);
+	--tam-h3: clamp(2.5rem, 2.1181rem + 1.2222vw, 3.1875rem);
+	--tam-h4: clamp(1.75rem, 1.4722rem + 0.8889vw, 2.25rem);
+	--tam-h5: 1.5625rem;
+	--tam-h6: 1.3125rem;
+	--tam-p: 1rem;
+	--tam-small: 0.875rem;
+}
+
+* {
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+}
+
+html,
+body {
+	background-color: var(--light);
+	scroll-behavior: smooth !important;
+}
+
+main {
+	height: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+label,
+b,
+li,
+div,
+a,
+button,
+td,
+th {
+	font-family: var(--font-nunito) !important;
+	margin: 0;
+}
+
+h1 {
+	font-style: normal;
+	font-weight: 400;
+	font-size: var(--tam-h1);
+	line-height: 120%;
+	color: var(--darker);
+}
+
+h2 {
+	font-style: normal;
+	font-weight: 400;
+	font-size: var(--tam-h2);
+	line-height: 120%;
+	color: var(--darker);
+}
+h3 {
+	font-style: normal;
+	font-weight: 400;
+	font-size: var(--tam-h3);
+	line-height: 120%;
+	color: var(--darker);
+}
+h4 {
+	font-style: normal;
+	font-weight: 400;
+	font-size: var(--tam-h4);
+	line-height: 110%;
+	color: var(--darker);
+}
+h5 {
+	font-style: normal;
+	font-weight: 400;
+	font-size: var(--tam-h5);
+	line-height: 110%;
+	color: var(--darker);
+}
+h6,
+th {
+	font-style: normal;
+	font-weight: 400;
+	font-size: var(--tam-h6);
+	line-height: 110%;
+	color: var(--darker);
+}
+p,
+a,
+label,
+button,
+td {
+	font-style: normal;
+	font-weight: 400;
+	font-size: var(--tam-p);
+	line-height: 150%;
+	color: var(--darker);
+}
+small {
+	font-style: normal;
+	font-weight: 400;
+	font-size: var(--tam-small);
+	line-height: 150%;
+	color: var(--darker);
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+	transition: all 0.5s;
+}
+
+button {
+	transition: all 0.5s;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+	label {
+		font-weight: bold;
+	}
+
+	select,
+	input {
+		color: var(--darker);
+
+		&::placeholder {
+			color: var(--gray);
+		}
+
+		&:focus,
+		&:active {
+			outline: none;
+			box-shadow: none;
+			border-color: var(--primary);
+		}
+	}
+
+	.action-button {
+		display: flex;
+		justify-content: flex-end;
+	}
+}
