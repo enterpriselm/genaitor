@@ -17,6 +17,7 @@ async def main():
             "residual_evaluation_agent": residual_evaluation_agent,
             "lstm_model_agent": lstm_model_agent,
             "lstm_residual_evaluation_agent": lstm_residual_evaluation_agent
+            # Adicionar Neural ODEs
         },
         flows={
             "time_series_analysis_flow": Flow(
