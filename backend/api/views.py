@@ -1,6 +1,5 @@
 from django.shortcuts import render
 import sys
-import os
 import asyncio
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -10,97 +9,83 @@ from .models import AgentModel, TaskModel, Response as ResponseModel
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-# Adicionar o caminho do projeto ao sys.path para importar os módulos
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(project_root)
-
 # Importações atualizadas dos módulos src
-from src.core import Orchestrator, Flow, ExecutionMode
-from presets.agents import *
-from presets.tasks import *
-from presets.tasks_objects import *
-from presets.providers import *
+from genaitor.core import Orchestrator, Flow, ExecutionMode
+from genaitor.presets.agents import *
+from genaitor.presets.tasks import *
+from genaitor.presets.tasks_objects import *
+from genaitor.presets.providers import *
 
-# Mapeamento dos agentes disponíveis
-AGENT_MAPPING = {
-    "qa_agent": qa_agent,
-    "autism_agent": autism_agent,
-    "agent_creation": agent_creation,
-    "data_understanding_agent": data_understanding_agent,
-    "statistics_agent": statistics_agent,
-    "anomalies_detection_agent": anomalies_detection_agent,
-    "data_analysis_agent": data_analysis_agent,
-    "problem_analysis_agent": problem_analysis_agent,
-    "numerical_analysis_agent": numerical_analysis_agent,
-    "pinn_modeling_agent": pinn_modeling_agent,
-    "preferences_agent": preferences_agent,
-    "payment_agent": payment_agent,
-    "proposal_agent": proposal_agent,
-    "review_agent": review_agent,
-    "extraction_agent": extraction_agent,
-    "matching_agent": matching_agent,
-    "scoring_agent": scoring_agent,
-    "report_agent": report_agent,
-    "optimization_agent": optimization_agent,
-    "educational_agent": educational_agent,
-    "research_agent": research_agent,
-    "content_agent": content_agent,
-    "personalization_agent": personalization_agent,
-    "financial_agent": financial_agent,
-    "summarization_agent": summarization_agent,
-    "linkedin_agent": linkedin_agent,
-    "pinn_tuning_agent": pinn_tuning_agent,
-    "html_analysis_agent": html_analysis_agent,
-    "scraper_generation_agent": scraper_generation_agent,
-    "equation_solver_agent": equation_solver_agent,
-    "pinn_generation_agent": pinn_generation_agent,
-    "hyperparameter_optimization_agent": hyperparameter_optimization_agent,
-    "orchestrator_agent": orchestrator_agent,
-    "validator_agent": validator_agent,
-    "requirements_agent": requirements_agent,
-    "architecture_agent": architecture_agent,
-    "code_generation_agent": code_generation_agent,
-    "destination_selection_agent": destination_selection_agent,
-    "budget_estimation_agent": budget_estimation_agent,
-    "itinerary_planning_agent": itinerary_planning_agent,
-    "feature_selection_agent": feature_selection_agent,
-    "signal_analysis_agent": signal_analysis_agent,
-    "residual_evaluation_agent": residual_evaluation_agent,
-    "lstm_model_agent": lstm_model_agent,
-    "lstm_residual_evaluation_agent": lstm_residual_evaluation_agent,
-    "document_agent": document_agent,
-    "question_agent": question_agent,
-    "search_agent": search_agent,
-    "response_agent": response_agent,
-    "performance_agent": performance_agent,
-    "fatigue_agent": fatigue_agent,
-    "tactical_agent": tactical_agent,
-    "scraping_agent": scraping_agent,
-    "analysis_agent": analysis_agent,
-    "disaster_analysis_agent": disaster_analysis_agent,
-    "agro_analysis_agent": agro_analysis_agent,
-    "ecological_analysis_agent": ecological_analysis_agent,
-    "air_quality_analysis_agent": air_quality_analysis_agent,
-    "vegetation_analysis_agent": vegetation_analysis_agent,
-    "soil_moisture_analysis_agent": soil_moisture_analysis_agent
-}
-
-class AgentViewSet(viewsets.ReadOnlyModelViewSet):
+class AgentViewSet(viewsets.ModelViewSet):
     """
-    ViewSet para listar todos os agentes disponíveis.
+    ViewSet para gerenciar agentes.
+    Permite criar, ler, atualizar e excluir agentes no banco de dados.
     """
-    queryset = []
+    queryset = AgentModel.objects.all()
     serializer_class = AgentSerializer
     
     def get_queryset(self):
-        # Cria objetos AgentModel a partir do mapeamento
-        agents = []
-        for agent_name in sorted(AGENT_MAPPING.keys()):
-            agent = AgentModel()
-            agent.name = agent_name
-            agents.append(agent)
-        return agents
-    
+        db_agents = list(AgentModel.objects.all())
+        db_agent_names = [agent.name for agent in db_agents]
+        agent_vars = [var for var in globals() if var.endswith("_agent")]
+
+        for agent_var_name in agent_vars:
+            if not AgentModel.objects.filter(name=agent_var_name).exists():
+                agent_obj = globals()[agent_var_name]
+                agent_model = AgentModel(name=agent_var_name)
+
+                # Role (convert enum para string)
+                if hasattr(agent_obj, "role"):
+                    role = agent_obj.role
+                    agent_model.role = role.name if hasattr(role, "name") else str(role)
+                else:
+                    agent_model.role = f"Agente: {agent_var_name}"
+
+                # Configurações
+                config = getattr(agent_obj, "config", None)
+                agent_model.max_retries = getattr(config, "max_retries", 1)
+                agent_model.timeout = getattr(config, "timeout", 30)
+                agent_model.validation_required = getattr(config, "validation_required", False)
+                agent_model.cache_results = getattr(config, "cache_results", False)
+
+                # Salva primeiro para poder usar .set() nas tasks depois
+                agent_model.save()
+
+                if hasattr(agent_obj, "tasks"):
+                    try:
+                        
+                        task_objs = []
+                        for t in agent_obj.tasks:
+                            
+                            try:
+                                task_from_db = TaskModel.objects.get(description=t.description)
+                                task_objs.append(task_from_db)
+                                print(f"   ✓ Encontrada no banco: {task_from_db}")
+                            except TaskModel.DoesNotExist:
+                                new_task = TaskModel.objects.create(
+                                name=t.description,  # Nome simples baseado na descrição
+                                description=t.description,
+                                goal=t.goal,
+                                output_format=t.output_format,
+                                is_active=True,
+                                )
+                                task_objs.append(new_task)
+                                print(f"   ➕ Criada nova Task no banco: {new_task}")
+                        
+                        print(f"Tasks válidas encontradas: {task_objs}")
+                        agent_model.tasks.set(task_objs)
+                        print(f"✓ Tasks associadas com sucesso ao agente '{agent_var_name}'.")
+
+                    except Exception as e:
+                        print(f"✗ Erro ao extrair tasks do agente '{agent_var_name}': {str(e)}")
+                        agent_model.tasks.clear()
+                else:
+                    print(f"Agente '{agent_var_name}' NÃO possui atributo 'tasks'. Limpando tasks.")
+                    agent_model.tasks.clear()
+                    db_agents.append(agent_model)
+
+        return sorted(db_agents, key=lambda x: x.name)
+
     @swagger_auto_schema(
         operation_description="Retorna a lista completa de agentes disponíveis",
         responses={200: openapi.Response("Lista de Agentes", AgentSerializer(many=True))}
@@ -110,6 +95,73 @@ class AgentViewSet(viewsets.ReadOnlyModelViewSet):
         agents = self.get_queryset()
         serializer = self.get_serializer(agents, many=True)
         return DRFResponse(serializer.data)
+    
+    @swagger_auto_schema(
+        operation_description="Cria um novo agente no banco de dados como Agent",
+        request_body=AgentSerializer,
+        responses={
+            201: openapi.Response("Agente criado", AgentSerializer),
+            400: openapi.Response("Dados inválidos", 
+                schema=openapi.Schema(type=openapi.TYPE_OBJECT)
+            )
+        }
+    )
+    def create(self, request):
+        """Cria um novo agente no banco de dados e o registra como Agent."""
+        serializer = self.get_serializer(data=request.data)
+        
+        if serializer.is_valid():
+            # Salvar a tarefa no banco de dados
+            agent = serializer.save()
+            
+            try:              
+                provider = gemini_provider()
+                                
+                # Criar uma instância de Agent
+                agent_obj = Agent(
+                    role=agent.role,
+                    tasks=agent.tasks,
+                    llm_provider=provider
+                )
+                
+                # Registrar o agente no módulo global
+                agent_var_name = f"{agent.name}_agent"
+                globals()[agent_var_name] = agent
+                
+                # Se o módulo de agents estiver acessível, também registrar lá
+                if 'presets.agents' in sys.modules:
+                    import genaitor.presets.agents
+                    setattr(genaitor.presets.agents, agent_var_name, agent_obj)
+
+                agent_mapping = {}
+                for var in globals():
+                    if var.endswith('_agent'):
+                        agent_mapping[var] = globals()[var]
+                        
+                return DRFResponse(
+                    self.get_serializer(agent).data,
+                    status=status.HTTP_201_CREATED
+                )
+            except Exception as e:
+                # Se falhar ao registrar como Agent, ainda retornamos sucesso
+                # mas logamos o erro para debugging
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Erro ao registrar agent como Agent: {str(e)}")
+                
+                return DRFResponse(
+                    {
+                        **self.get_serializer(agent).data,
+                        "warning": "O agente foi criada no banco de dados, mas não foi possível registrá-lo como Agent no sistema."
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+        
+        return DRFResponse(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
 
 
 class GenaitorViewSet(viewsets.ViewSet):
@@ -185,48 +237,58 @@ class GenaitorViewSet(viewsets.ViewSet):
         """
         Processa uma solicitação utilizando um agente específico do Genaitor
         """
-        # Validação manual dos dados
         data = request.data
         errors = {}
-        
+
         if not data.get('agent_name'):
             errors['agent_name'] = ["Este campo é obrigatório."]
-            
+
         if not data.get('input_data'):
             errors['input_data'] = ["Este campo é obrigatório."]
-            
+
         if errors:
             return DRFResponse(errors, status=status.HTTP_400_BAD_REQUEST)
-            
+
         agent_name = data.get('agent_name')
         input_data = data.get('input_data')
-        
-        if agent_name not in AGENT_MAPPING:
-            return DRFResponse(
-                {
-                    "error": "Agent not found!",
-                    "message": f"O agente '{agent_name}' não está disponível. Use o endpoint /api/agents/ para ver a lista de agentes disponíveis."
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
+
+        agent_instance = None
+        agent_callable = None
+
+        # 1. Verifica se está no AGENT_MAPPING
+        if agent_name in AGENT_MAPPING:
+            agent_callable = AGENT_MAPPING[agent_name]
+        else:
+            # 2. Tenta buscar no banco
+            try:
+                agent_instance = AgentModel.objects.get(role=agent_name)
+                agent_callable = agent_instance.to_agent()  # método do model que instancia um Agent real
+            except AgentModel.DoesNotExist:
+                return DRFResponse(
+                    {
+                        "error": "Agent not found!",
+                        "message": f"O agente '{agent_name}' não está disponível. Use o endpoint /api/agents/ para ver a lista de agentes disponíveis."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         try:
             # Configurar o orquestrador com o agente solicitado
             orchestrator = Orchestrator(
-                agents={agent_name: AGENT_MAPPING[agent_name]},
+                agents={agent_name: agent_callable},
                 flows={"default_flow": Flow(agents=[agent_name], context_pass=[True])},
                 mode=ExecutionMode.SEQUENTIAL
             )
-            
+
             # Processar a requisição de forma assíncrona
             result = asyncio.run(orchestrator.process_request(input_data, flow_name='default_flow'))
-            
+
             # Criar objeto Response e serializar
             response_obj = ResponseModel(response=result["content"].get(agent_name))
             response_serializer = ResponseSerializer(response_obj)
-            
+
             return DRFResponse(response_serializer.data)
-                
+
         except Exception as e:
             return DRFResponse(
                 {"error": str(e)},
@@ -348,7 +410,7 @@ class TaskViewSet(viewsets.ModelViewSet):
                 
                 # Se o módulo de tarefas estiver acessível, também registrar lá
                 if 'presets.tasks' in sys.modules:
-                    import presets.tasks
+                    import genaitor.presets.tasks
                     setattr(presets.tasks, task_var_name, general_task)
                 
                 # Adicionar a nova tarefa ao mapeamento de tarefas existentes

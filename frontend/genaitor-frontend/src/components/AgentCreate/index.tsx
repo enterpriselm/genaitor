@@ -144,7 +144,7 @@ export default function AgentCreate() {
 		e.preventDefault()
 		setLoading(true)
 		await service
-			.post("/create-agent", {
+			.post("/agent", {
 				agent_name: agentName,
 				agent_description: agentDescription,
 				agent_role: selectedRole,

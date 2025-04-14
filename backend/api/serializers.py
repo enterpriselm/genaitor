@@ -7,7 +7,13 @@ class AgentSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = AgentModel
-        fields = ['name']
+        fields = [
+            'id', 'name', 'role', 'tasks', 'config',
+            'conversation_history', 'task_history', 
+            'max_retries', 'timeout', 'validation_required',
+            'cache_results', 'created_at', 'updated_at',
+            'is_active',
+        ]
 
 class TaskSerializer(serializers.ModelSerializer):
     """
