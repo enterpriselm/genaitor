@@ -211,4 +211,4 @@ For any questions or suggestions, feel free to open an issue or contact the main
 
 You can also check our landing-page to more news:
 
-www.enterpriselm.github.io/home
+enterpriselm.github.io/home
