@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 @dataclass
 class LLMConfig:
-    """Configuração base para LLMs"""
+    """Basic Settings for LLMs"""
     temperature: float = 0.1
     max_tokens: int = 1000
     verbose: bool = False
@@ -16,10 +16,10 @@ class LLMProvider(ABC):
 
     @abstractmethod
     def generate(self, prompt: str, **kwargs) -> str:
-        """Gera texto baseado no prompt"""
+        """Generate text based on prompt"""
         pass
 
     @abstractmethod
     def stream(self, prompt: str, **kwargs) -> Iterator[str]:
-        """Stream de texto baseado no prompt"""
+        """Text stream based on prompt"""
         pass 
