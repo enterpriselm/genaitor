@@ -2,13 +2,13 @@
   <img src="logo.png" alt="Genaitor Logo" width="300"/>
 </p>
 
-# Genaitor
+# GenAItor
 
 A platform for AI Agents and AI Agents products generation.
 
 ## Overview
 
-Genaitor is a cutting-edge platform designed to generate AI agents and related products that help automate complex tasks and processes. It leverages state-of-the-art machine learning libraries and tools to deliver flexible and scalable AI solutions.
+GenAItor is a cutting-edge platform designed to generate AI agents and related products that help automate complex tasks and processes. It leverages state-of-the-art machine learning libraries and tools to deliver flexible and scalable AI solutions.
 
 To install the required dependencies, follow these steps:
 
