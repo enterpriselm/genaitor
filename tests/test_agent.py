@@ -1,7 +1,7 @@
 import asyncio
 import unittest
-from src.core.agent import Agent
-from src.core.base import Task, TaskResult, AgentRole
+from genaitor.core.agent import Agent
+from genaitor.core.base import Task, TaskResult, AgentRole
 
 class MockTask(Task):
     def execute(self, input_data):

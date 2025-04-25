@@ -1,7 +1,7 @@
 import os
 from llm import GeminiProvider, GeminiConfig
 from dotenv import load_dotenv
-load_dotenv(r'C:\Users\SafeGain\projects\genaitor\.env')
+load_dotenv(r'.env')
 
 api_keys = [os.getenv('API_KEY')]
 

@@ -9,9 +9,8 @@ init(autoreset=True)
 
 GREEN_PASTEL = "\033[38;2;144;238;144m"
 
-import logging  # Added logging
+import logging
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 
 class ExecutionMode(Enum):
@@ -95,21 +94,21 @@ class Orchestrator:
                 result = await self._execute_agent(agent, request, context if should_pass_context else None)
                 results[agent_name] = result
                 if result.success:
-                    context[agent_name] = result.content  # Update context with the agent's response
+                    context[agent_name] = result.content
 
             return {
                 "success": True,
                 "content": results
             }
         except KeyError as e:
-            logging.error(f"Flow '{flow_name}' not found: {str(e)}")  # Log specific error
+            logging.error(f"Flow '{flow_name}' not found: {str(e)}")
             return {
                 "success": False,
                 "content": None,
                 "error": f"Flow '{flow_name}' not found."
             }
         except Exception as e:
-            logging.error(f"Error processing request: {str(e)}")  # Log the error
+            logging.error(f"Error processing request: {str(e)}")
             return {
                 "success": False,
                 "content": None,

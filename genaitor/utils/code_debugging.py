@@ -3,8 +3,8 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.genaitor.core import Orchestrator, Flow, ExecutionMode
-from src.genaitor.presets.agents import debugging_agent
+from genaitor.core import Orchestrator, Flow, ExecutionMode
+from genaitor.presets.agents import debugging_agent
 import subprocess
 
 async def main(file_path=r'examples\files\numerical_modeling.py'):

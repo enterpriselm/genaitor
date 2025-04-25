@@ -1,120 +1,90 @@
-import asyncio
-from src.genaitor.core import (
-    Agent, Task, Orchestrator, Flow,
-    ExecutionMode, AgentRole, TaskResult
+from genaitor.core import Task
+import torch
+import json
+import os
+from datetime import datetime
+from datasets import Dataset
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM,
+    TrainingArguments,
+    BitsAndBytesConfig,
 )
-from src.genaitor.llm import GeminiProvider, GeminiConfig
-from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoTokenizer
-from datasets import load_dataset
-from fastapi import FastAPI
+from peft import LoraConfig, get_peft_model, TaskType
+from trl import SFTTrainer
 
-class FineTuningTask(Task):
-    def __init__(self, model_name, dataset_name, output_dir, llm_provider):
-        super().__init__(
-            description="Fine-tuning strategy",
-            goal="Train an LLM and suggest best hyperparameters",
-            output_format="JSON format with training settings"
-        )
+class CustomFineTuningTask(Task):
+    def __init__(self, model_name, dataset_path, output_dir, provider):
+        super().__init__()
         self.model_name = model_name
-        self.dataset_name = dataset_name
+        self.dataset_path = dataset_path
         self.output_dir = output_dir
-        self.llm = llm_provider
+        self.provider = provider
 
-    def execute(self) -> TaskResult:
-        try:
-            prompt = f"""
-            You are an expert in training language models.
-            The model {self.model_name} will be fine-tuned using the dataset {self.dataset_name}.
+    def run(self, *args, **kwargs):
+        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+        print("\n--- Custom Fine-tuning ---")
 
-            Requirements:
+        def load_jsonl_dataset(path):
+            with open(path, "r", encoding="utf-8") as f:
+                data = [json.loads(line) for line in f]
+            dataset = Dataset.from_list([{
+                "text": f"<s>[INST] {item['prompt'].strip()} [/INST] {item['response'].strip()}</s>"
+            } for item in data])
+            return dataset
 
-            Suggest the best hyperparameters (learning rate, batch size, warmup steps).
-            Indicate if LoRA or QLoRA should be used to optimize memory.
-            Report any potential risks or issues based on the dataset.
-            Return a JSON in the format:
+        dataset = load_jsonl_dataset(self.dataset_path)
 
-            {
-                "learning_rate": 0.0001,
-                "batch_size": 8,
-                "warmup_steps": 100,
-                "use_LoRA": true,
-                "recommendations": "Avoid overfitting by using early stopping."
-            }
-            """
-            hyperparams = self.llm.generate(prompt)
-            
-            model = AutoModelForCausalLM.from_pretrained(self.model_name)
-            tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-            dataset = load_dataset(self.dataset_name)
+        tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=True)
+        tokenizer.pad_token = tokenizer.eos_token
+        dataset = dataset.map(lambda ex: tokenizer(ex["text"], padding="max_length", truncation=True, max_length=512), batched=True)
 
-            def tokenize_function(examples):
-                return tokenizer(examples["text"], padding="max_length", truncation=True)
-            
-            tokenized_datasets = dataset.map(tokenize_function, batched=True)
-            
-            training_args = TrainingArguments(
-                output_dir=self.output_dir,
-                evaluation_strategy="epoch",
-                save_strategy="epoch",
-                per_device_train_batch_size=hyperparams.get("batch_size", 4),
-                num_train_epochs=1,
-                weight_decay=0.01
-            )
-            
-            trainer = Trainer(
-                model=model,
-                args=training_args,
-                train_dataset=tokenized_datasets["train"],
-                eval_dataset=tokenized_datasets["test"]
-            )
-            
-            trainer.train()
-            model.save_pretrained(self.output_dir)
-            tokenizer.save_pretrained(self.output_dir)
-            
-            return TaskResult(success=True, content=self.output_dir)
-        except Exception as e:
-            return TaskResult(success=False, content=None, error=str(e))
-
-
-class ModelDeploymentTask(Task):
-    def __init__(self, model_dir, llm_provider):
-        super().__init__(
-            description="Model Deployment Strategy",
-            goal="Deploy a trained LLM via API",
-            output_format="JSON format with deployment recommendations"
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.bfloat16
         )
-        self.model_dir = model_dir
-        self.llm = llm_provider
 
-    def execute(self) -> TaskResult:
-        try:
-            prompt = f"""
-            You are an expert in deploying language models.
-            The trained model is located in {self.model_dir}.
+        model = AutoModelForCausalLM.from_pretrained(
+            self.model_name,
+            quantization_config=bnb_config,
+            device_map="auto",
+            trust_remote_code=True
+        )
 
-            Tasks:
+        lora_config = LoraConfig(
+            r=4,
+            lora_alpha=16,
+            target_modules=["q_proj", "v_proj"],
+            lora_dropout=0.05,
+            bias="none",
+            task_type=TaskType.CAUSAL_LM
+        )
 
-            - Suggest the best architecture to serve this model (FastAPI, Flask, Triton, vLLM, etc.).
-            - Provide the minimum required resources (RAM, VRAM, CPU).
-            - Generate a code snippet to load the model and create a /generate endpoint.            
-            """
-            deployment_recommendations = self.llm.generate(prompt)
-            
-            model = AutoModelForCausalLM.from_pretrained(self.model_dir)
-            tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
-            
-            app = FastAPI()
+        model = get_peft_model(model, lora_config)
 
-            @app.post("/generate")
-            async def generate_text(prompt: str):
-                inputs = tokenizer(prompt, return_tensors="pt")
-                outputs = model.generate(**inputs, max_length=200)
-                return {"generated_text": tokenizer.decode(outputs[0], skip_special_tokens=True)}
-            
-            import uvicorn
-            uvicorn.run(app, host="0.0.0.0", port=8000)
-            
-            return TaskResult(success=True, content="http://localhost:8000/generate")
-        except Exception as e:
-            return TaskResult(success=False, content=None, error=str(e))
+        training_args = TrainingArguments(
+            output_dir=self.output_dir,
+            per_device_train_batch_size=2,
+            gradient_accumulation_steps=4,
+            logging_steps=10,
+            learning_rate=2e-4,
+            num_train_epochs=3,
+            bf16=True,
+            save_total_limit=2,
+            save_strategy="epoch",
+            report_to="none"
+        )
+
+        trainer = SFTTrainer(
+            model=model,
+            train_dataset=dataset,
+            args=training_args,
+        )
+
+        trainer.train()
+        model.save_pretrained(self.output_dir)
+        tokenizer.save_pretrained(self.output_dir)
+
+        return {"success": True, "content": self.output_dir}

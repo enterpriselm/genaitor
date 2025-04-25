@@ -1,5 +1,5 @@
 import unittest
-from src.utils.text_splitter import TextSplitter
+from genaitor.utils.text_splitter import TextSplitter
 
 class TestTextSplitter(unittest.TestCase):
     def setUp(self):

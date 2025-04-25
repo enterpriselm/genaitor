@@ -1,7 +1,7 @@
 import logging  # Added logging
 from typing import Any, Dict, List, Optional, Union
 from .base import Task, TaskResult, AgentRole
-from genaitor.llm import LLMProvider
+from llm import LLMProvider
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

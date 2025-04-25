@@ -1,7 +1,7 @@
 import asyncio
 import unittest
-from llm.fine_tuning import FineTuningTask
-from src.core.base import TaskResult
+from genaitor.llm.fine_tuning import FineTuningTask
+from genaitor.core.base import TaskResult
 
 class MockLLMProvider:
     def generate(self, prompt):

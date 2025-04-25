@@ -1,5 +1,5 @@
 import unittest
-from src.core.base import Task, TaskResult
+from genaitor.core.base import Task, TaskResult
 
 class MockTask(Task):
     def execute(self, input_data):

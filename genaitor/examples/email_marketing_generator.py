@@ -1,13 +1,16 @@
+import os
+import sys
 import asyncio
 from dotenv import load_dotenv
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core import Orchestrator, Flow, ExecutionMode
 from presets.agents import research_agent, content_agent, optimization_agent, personalization_agent
 
 async def main():
-    print("\n🚀 Inicializando sistema de geração de e-mails...")
+    print("\n🚀 Initializing generating e-mail systems...")
 
-    # Orquestração do fluxo de e-mails
     orchestrator = Orchestrator(
         agents={
             "research_agent": research_agent,
@@ -24,14 +27,13 @@ async def main():
         mode=ExecutionMode.SEQUENTIAL
     )
 
-    # Exemplo de campanha de teste
     campaign_details = {
-        "product": "Novo curso de Machine Learning",
-        "audience": "Profissionais de tecnologia interessados em IA",
-        "goal": "Gerar leads e aumentar conversões"
+        "product": "New Machine Learning course",
+        "audience": "Tech professionals with interest in AI",
+        "goal": "Generate leads and increase conversions"
     }
 
-    print("\n🔍 Analisando público-alvo...")
+    print("\n🔍 Analyzing target public...")
 
     try:
         result = await orchestrator.process_request(
@@ -40,13 +42,12 @@ async def main():
         )
 
         if result["success"]:
-            print("\n✉️ E-mail final gerado:")
             print(result['content'])
         else:
-            print(f"\n❌ Erro: {result['error']}")
+            print(f"\n❌ Error: {result['error']}")
 
     except Exception as e:
-        print(f"\n❌ Erro: {str(e)}")
+        print(f"\n❌ Error: {str(e)}")
 
 if __name__ == "__main__":
     asyncio.run(main())

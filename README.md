@@ -1,14 +1,20 @@
+<p align="center">
+  <img src="logo.png" alt="Genaitor Logo" width="300"/>
+</p>
+
 # Genaitor
 
-Genaitor is a framework for building AI agents that can perform various tasks using generative models.
+A platform for AI Agents and AI Agents products generation.
 
-## Installation
+## Overview
+
+Genaitor is a cutting-edge platform designed to generate AI agents and related products that help automate complex tasks and processes. It leverages state-of-the-art machine learning libraries and tools to deliver flexible and scalable AI solutions.
 
 To install the required dependencies, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/genaitor.git
+   git clone https://github.com/enterpriselm/genaitor.git
    cd genaitor
    ```
 
@@ -20,12 +26,20 @@ To install the required dependencies, follow these steps:
 
 3. Install the required packages:
    ```bash
-   pip install -r requirements.txt
+   pip install -e .
    ```
 
-## Diagram
+4. Add API_KEY for llm (Gemini set as main, but you can use Anthropic, OpenAI, DeepSeek, Grok, Ollama or a custom LLM model):
+   ```bash
+   echo "API_KEY=your_gemini_api_key" >> .env
+   ```
 
-![System Pipeline](https://github.com/enterpriselm/genaitor/blob/main/genaitor.jpg?raw=true)
+## Features
+
+- Generate AI agents for a variety of use cases.
+- Modular architecture with components such as `core`, `llm`, `utils`, and `presets`.
+- Support for multiple data processing and communication protocols.
+- Integration with popular libraries like Transformers, Langchain, and more.
 
 ## Usage
 
@@ -34,8 +48,8 @@ To install the required dependencies, follow these steps:
 Here’s a simple example of how to create an agent that answers questions using a generative model:
 
 ```python
-from src.core import Agent, Task
-from src.llm import GeminiProvider, GeminiConfig
+from genaitor.core import Agent, Task
+from genaitor.llm import GeminiProvider, GeminiConfig
 
 # Define a custom task
 class QuestionAnsweringTask(Task):
@@ -70,11 +84,11 @@ Here’s a simple example of how to create a flow using multiple agents:
 
 ```python
 import asyncio
-from src.core import (
+from genaitor.core import (
     Agent, Task, Orchestrator, Flow,
     ExecutionMode, AgentRole, TaskResult
 )
-from src.llm import GeminiProvider, GeminiConfig
+from genaitor.llm import GeminiProvider, GeminiConfig
 
 # Define a base task (you could use different tasks for each agent)
 class LLMTask(Task):
@@ -150,6 +164,33 @@ result = asyncio.run(result_process)
 print(result)
 ```
 
+## Examples usage
+
+Here is a simple guideline for running the examples
+
+### Streamlit APPs
+
+```bash
+
+streamlit run genaitor\apps\pinneaple.py
+```
+
+### General examples
+
+```bash
+
+python genaitor\examples\autism_assistant.py
+```
+
+## Demo Videos
+
+Here are some demo videos showcasing Genaitor in action:
+
+- [Apps Generation](https://youtu.be/aJboXG3RvsA)
+- [OCR and Power Apps Automatization](https://youtu.be/VvIb7x3PJWQ)
+- [Satellite Images Analysis](https://youtu.be/hsjanmnCxJ4)
+- [PINNeAPPle](https://youtu.be/AbYr3F_v5OA)
+
 ## Contribution Guidelines
 
 We welcome contributions! To contribute:
@@ -162,8 +203,12 @@ We welcome contributions! To contribute:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
 
 ## Contact
 
-For any questions or suggestions, feel free to open an issue or contact the maintainers at executive.enterpriselm@gmail.com
+For any questions or suggestions, feel free to open an issue or contact the maintainers at executive.enterpriselm@gmail.com or the main author Yan Barros at https://www.linkedin.com/in/yan-barros-yan
+
+You can also check our landing-page to more news:
+
+www.enterpriselm.github.io/home

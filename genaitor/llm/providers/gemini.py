@@ -11,7 +11,7 @@ from typing import Optional, List, Iterator
 import logging
 import os
 import warnings
-from ...utils.text_splitter import TextSplitter
+from utils.text_splitter import TextSplitter
 import tiktoken
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'

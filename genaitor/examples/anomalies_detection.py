@@ -1,5 +1,8 @@
 import pandas as pd
 import asyncio
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core import (
     Orchestrator, Flow, ExecutionMode
@@ -19,7 +22,7 @@ async def main():
         mode=ExecutionMode.SEQUENTIAL
     )
     
-    input_data = pd.read_csv(r'genaitor\examples\files\temperature.csv')
+    input_data = pd.read_csv(r'examples\files\temperature.csv')
     
     try:
         result = await orchestrator.process_request(input_data, flow_name='anomalies_detection_flow')
@@ -29,7 +32,7 @@ async def main():
             for python_code in python_codes:
                 if python_code.startswith('python'):
                     i+=1
-                    filename=f'genaitor/examples/files/anomaly_detection_{i}.py'
+                    filename=f'examples/files/anomaly_detection_{i}.py'
                     with open(filename,'w') as f:
                         f.write(python_code.partition('python')[2])
                     print(python_code.partition('python')[2])

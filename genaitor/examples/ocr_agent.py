@@ -4,13 +4,13 @@ import os
 
 import asyncio
 
-from genaitor.core import (
+from core import (
     Orchestrator, Flow, ExecutionMode
 )
-from genaitor.presets.agents import structure_data_agent
+from presets.agents import structure_data_agent
 import pandas as pd
 import json
-from genaitor.core.base import OCRImageAgent
+from core.base import OCRImageAgent
 from sqlalchemy import create_engine
 import re
 

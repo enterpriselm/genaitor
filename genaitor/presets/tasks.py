@@ -1,5 +1,5 @@
-from genaitor.presets.tasks_objects import *
-from genaitor.presets.providers import gemini_provider, gemini_provider2
+from presets.tasks_objects import *
+from presets.providers import gemini_provider, gemini_provider2
 
 provider = gemini_provider()
 provider2 = gemini_provider2()

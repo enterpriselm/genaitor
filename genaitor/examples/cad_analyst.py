@@ -1,4 +1,9 @@
+import os
+import sys
 import asyncio
+
+# Add project path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core import (
     Orchestrator, Flow, ExecutionMode

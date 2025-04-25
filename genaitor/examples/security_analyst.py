@@ -1,8 +1,13 @@
+import os
 import asyncio
+import sys
 import requests
 import json
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+
+# Add project path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core import Orchestrator, Flow, ExecutionMode
 from presets.agents import scraping_agent, analysis_agent, report_agent
@@ -50,7 +55,7 @@ async def main():
         mode=ExecutionMode.SEQUENTIAL
     )
 
-    target_url = "http://example.com"
+    target_url = "http://google.com"
 
     print(f"\nScraping security content from: {target_url}")
 
