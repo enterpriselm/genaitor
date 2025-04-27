@@ -37,7 +37,7 @@ To install the required dependencies, follow these steps:
 ## General Framework Architecture
 
 <p align="center">
-  <img src="ELM.pdf_20250427_112621_0000.png" alt="General Diagram" width="500"/>
+  <img src="ELM.pdf_20250427_112621_0000.png" alt="General Diagram" width="600"/>
 </p>
 
 ## Features
