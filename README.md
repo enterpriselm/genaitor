@@ -191,6 +191,47 @@ Here are some demo videos showcasing Genaitor in action:
 - [Satellite Images Analysis](https://youtu.be/hsjanmnCxJ4)
 - [PINNeAPPle](https://youtu.be/AbYr3F_v5OA)
 
+## FAQ
+
+Why should I use this framework over others like LangChain, LangGraph, CrewAI or LlamaIndex?
+
+While popular frameworks like LangChain, LangGraph, and LlamaIndex are powerful, they are primarily designed as general-purpose agentic frameworks.
+Our framework is specifically optimized for Scientific Machine Learning (SciML) applications and offers the following key advantages:
+
+- Specific focus on Scientific Machine Learning:
+Unlike generalist frameworks, we prioritize workflows tailored for scientific and physics-based AI tasks, where agent behavior often requires structured reasoning and domain-specific knowledge handling.
+
+- Greater control and transparency:
+Our design provides developers with direct access to agent modeling and lifecycle management.
+You are not tied to predefined abstractions or "black-box" architectures, allowing full customization to match scientific workflows.
+
+- Reduced learning curve:
+Our framework minimizes unnecessary complexity.
+Users can build efficient agents with a much simpler and more intuitive interface, without needing to dive deep into multiple layers of abstractions before achieving results.
+
+
+Is this framework compatible with LangChain or LlamaIndex?
+
+Our framework is independent but compatible with most libraries from the ecosystem.
+You can integrate components like LlamaIndex for document retrieval or LangChain tools if needed, while still maintaining full control over the agent lifecycle inside our framework.
+
+What kind of Scientific Machine Learning tasks is this framework suited for?
+
+This framework is designed for tasks such as:
+
+- Physics-informed problem solving
+
+- Scientific reasoning and simulation control
+
+- AI-driven research assistants for scientific domains
+
+- Autonomous agents for data-driven discovery processes
+
+- Interaction with physical simulation APIs, datasets, and analytical tools
+
+
+If your use case involves structured reasoning, scientific models, or physics-based tasks, this framework provides the flexibility and precision you need.
+
 ## Contribution Guidelines
 
 We welcome contributions! To contribute:
