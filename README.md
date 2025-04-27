@@ -34,6 +34,12 @@ To install the required dependencies, follow these steps:
    echo "API_KEY=your_gemini_api_key" >> .env
    ```
 
+## General Framework Architecture
+
+<p align="center">
+  <img src="ELM.pdf_20250427_112621_0000.png" alt="General Diagram" width="500"/>
+</p>
+
 ## Features
 
 - Generate AI agents for a variety of use cases.
