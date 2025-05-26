@@ -7,7 +7,7 @@ from pptx import Presentation
 from docx import Document
 import pandas as pd
 import speech_recognition as sr
-from moviepy.editor import AudioFileClip
+from moviepy import AudioFileClip
 
 def extract_text_from_pdf(file_path):
     with pdfplumber.open(file_path) as pdf:
