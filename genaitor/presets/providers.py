@@ -1,5 +1,5 @@
 import os
-from genaitor.llm import GeminiProvider, GeminiConfig
+from genaitor.genaitor.llm import GeminiProvider, GeminiConfig
 from dotenv import load_dotenv
 load_dotenv(r'.env')
 
