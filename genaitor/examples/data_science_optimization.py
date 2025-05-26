@@ -1,10 +1,8 @@
 import asyncio
 import os
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core import Orchestrator, Flow, ExecutionMode
-from presets.agents import optimization_agent
+from genaitor.core import Orchestrator, Flow, ExecutionMode
+from genaitor.presets.agents import optimization_agent
 
 async def main():
     print("\nInitializing ML/DL Optimization System...")
