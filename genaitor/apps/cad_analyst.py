@@ -1,14 +1,10 @@
 import streamlit as st
 import asyncio
-import os
-import sys
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from core import (
+from genaitor.core import (
     Orchestrator, Flow, ExecutionMode
 )
-from presets.agents import problem_analysis_agent, numerical_analysis_agent, pinn_modeling_agent
+from genaitor.presets.agents import problem_analysis_agent, numerical_analysis_agent, pinn_modeling_agent
 
 async def process_problem(user_requirements, problem_description):
     orchestrator = Orchestrator(
