@@ -26,13 +26,11 @@ import avro.schema
 import trimesh
 import open3d as o3d
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from core import (
+from genaitor.core import (
     Agent, Task, Orchestrator, TaskResult,
     ExecutionMode, AgentRole, Flow
 )
-from llm import GeminiProvider, GeminiConfig
+from genaitor.llm import GeminiProvider, GeminiConfig
 from dotenv import load_dotenv
 load_dotenv(r'genaitor\.env')
 
