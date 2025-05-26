@@ -1,11 +1,9 @@
 import asyncio
 import os
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import subprocess
-from core import Orchestrator, Flow, ExecutionMode
-from presets.agents import (
+from genaitor.core import Orchestrator, Flow, ExecutionMode
+from genaitor.presets.agents import (
     dev_requirements_agent, backend_agent, frontend_agent, cicd_agent
 )
 
