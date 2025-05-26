@@ -5,8 +5,8 @@ from transformers import Trainer, TrainingArguments, AutoModelForCausalLM, AutoT
 from datasets import load_dataset
 from fastapi import FastAPI
 
-from core import Task, TaskResult
-from presets.providers import gemini_provider
+from genaitor.core import Task, TaskResult
+from genaitor.presets.providers import gemini_provider
 
 provider = gemini_provider()
 
