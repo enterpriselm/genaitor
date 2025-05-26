@@ -1,12 +1,10 @@
 import asyncio
 import os
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core import (
+from genaitor.core import (
     Orchestrator, Flow, ExecutionMode
 )
-from presets.agents import agent_creation
+from genaitor.presets.agents import agent_creation
 
 async def main():
     print("\nInitializing Agent Creation Demo...")
