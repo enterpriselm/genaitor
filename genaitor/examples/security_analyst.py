@@ -1,16 +1,12 @@
 import os
 import asyncio
-import sys
 import requests
 import json
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
-# Add project path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from core import Orchestrator, Flow, ExecutionMode
-from presets.agents import scraping_agent, analysis_agent, report_agent
+from genaitor.core import Orchestrator, Flow, ExecutionMode
+from genaitor.presets.agents import scraping_agent, analysis_agent, report_agent
 
 def scrape_security_content(url: str) -> str:
     """Scrapes security-related elements from a web page."""
