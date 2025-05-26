@@ -1,12 +1,8 @@
 import streamlit as st
 import asyncio
 
-import os
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from core import Orchestrator, Flow, ExecutionMode
-from presets.agents import autism_agent
+from genaitor.core import Orchestrator, Flow, ExecutionMode
+from genaitor.presets.agents import autism_agent
 
 def process_request(hyperfocus, question):
     input_data = f"Hyperfocus: {hyperfocus}\nQuestion: {question}"
