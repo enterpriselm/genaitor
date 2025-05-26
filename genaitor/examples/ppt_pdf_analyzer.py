@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 import asyncio
 import PyPDF2
@@ -7,11 +6,8 @@ import pptx
 from dotenv import load_dotenv
 from typing import Dict, Any
 
-# Add project path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from core import Orchestrator, Flow, ExecutionMode
-from presets.agents import document_agent, question_agent, search_agent, response_agent
+from genaitor.core import Orchestrator, Flow, ExecutionMode
+from genaitor.presets.agents import document_agent, question_agent, search_agent, response_agent
 
 def extract_text_from_pdf(pdf_path: str) -> str:
     """Extracts text from a PDF file."""
