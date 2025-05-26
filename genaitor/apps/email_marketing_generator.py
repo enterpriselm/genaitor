@@ -1,12 +1,8 @@
 import streamlit as st
 import asyncio
-import os
-import sys
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from core import Orchestrator, Flow, ExecutionMode
-from presets.agents import research_agent, content_agent, optimization_agent, personalization_agent
+from genaitor.core import Orchestrator, Flow, ExecutionMode
+from genaitor.presets.agents import research_agent, content_agent, optimization_agent, personalization_agent
 
 
 def setup_orchestrator():
