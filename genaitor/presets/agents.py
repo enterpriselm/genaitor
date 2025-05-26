@@ -1,10 +1,7 @@
 import os
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from core import Agent, AgentRole
-from presets.tasks import *
-from presets.providers import gemini_provider, gemini_provider2
+from genaitor.core import Agent, AgentRole
+from genaitor.presets.tasks import *
+from genaitor.presets.providers import gemini_provider, gemini_provider2
 
 provider = gemini_provider()
 provider2 = gemini_provider2()
