@@ -12,7 +12,6 @@ license = { text = "MIT" }
 requires-python = ">=3.8"
 
 dependencies = [
-    "google-generativeai>=0.3.0",
     "transformers>=4.30.0",
     "pdfplumber>=0.9.0",
     "python-pptx>=0.6.21",
@@ -28,8 +27,6 @@ dependencies = [
     "requests>=2.31.0",
     "absl-py>=1.0.0",
     "grpcio>=1.50.0",
-    "torch>=2.0.0",
-    "numpy>=1.21.0",
     "matplotlib>=3.5.0",
     "tenacity>=8.0.0",
     "pillow>=10.4.0",
@@ -48,7 +45,6 @@ dependencies = [
     "google-genai>=1.11.0",
     "google-generativeai>=0.8.4",
     "absl-py>=2.1.0",
-    "tenacity>=9.0.0",
     "streamlit>=1.44.0",
     "tifffile>=2025.3.13",
     "opencv-python>=4.11.0.86",
