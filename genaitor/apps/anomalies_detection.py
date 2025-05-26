@@ -2,14 +2,10 @@ import streamlit as st
 import pandas as pd
 import asyncio
 
-import os
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from core import (
+from genaitor.core import (
     Orchestrator, Flow, ExecutionMode
 )
-from presets.agents import data_understanding_agent, statistics_agent, anomalies_detection_agent, data_analysis_agent
+from genaitor.presets.agents import data_understanding_agent, statistics_agent, anomalies_detection_agent, data_analysis_agent
 
 def process_file(file):
     df = pd.read_csv(file)
