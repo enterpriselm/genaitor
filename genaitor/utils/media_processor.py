@@ -47,6 +47,5 @@ def read_excel(file_path):
     return df.to_string(index=False)
 
 def image_to_text(image_path):
-    # TODO: Add preprocess with FURIO before OCR.
     image = Image.open(image_path)
     return pytesseract.image_to_string(image)

@@ -1,6 +1,6 @@
 [project]
 name = "genaitor"
-version = "0.1.1"
+version = "1.0.0"
 description = "An agent-based orchestration framework for generative AI workflows"
 authors = [
     { name="Yan Barros", email="seuemail@dominio.com" }

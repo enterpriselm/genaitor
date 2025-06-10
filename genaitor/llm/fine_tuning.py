@@ -1,7 +1,8 @@
-from genaito.core.base import Task
+from genaitor.core.base import Task
 import torch
 import json
 import os
+import re
 from datetime import datetime
 from datasets import Dataset
 from transformers import (
@@ -12,6 +13,40 @@ from transformers import (
 )
 from peft import LoraConfig, get_peft_model, TaskType
 from trl import SFTTrainer
+
+
+def txt_to_jsonl(txt_path, output_jsonl_path, delimiters=("###", "---", "***")):
+    """
+    Converte um .txt com pares prompt/response separados por delimitadores múltiplos para .jsonl.
+
+    Args:
+        txt_path (str): Caminho para o arquivo .txt.
+        output_jsonl_path (str): Caminho do arquivo .jsonl de saída.
+        delimiters (tuple[str]): Delimitadores permitidos entre prompt e resposta.
+    """
+    data = []
+    with open(txt_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    entries = [entry.strip() for entry in content.split("\n\n") if entry.strip()]
+    pattern = re.compile(rf"\s*({'|'.join(map(re.escape, delimiters))})\s*", re.MULTILINE)
+
+    for entry in entries:
+        parts = pattern.split(entry)
+        if len(parts) >= 3:
+            prompt = parts[0].strip()
+            response = parts[2].strip()
+            data.append({"prompt": prompt, "response": response})
+        else:
+            print(f"[!] Entrada ignorada (sem delimitador reconhecido):\n{entry}\n")
+
+    with open(output_jsonl_path, "w", encoding="utf-8") as out:
+        for item in data:
+            out.write(json.dumps(item, ensure_ascii=False) + "\n")
+
+    print(f"[✔] Dataset salvo em: {output_jsonl_path}")
+    return output_jsonl_path
+
 
 class CustomFineTuningTask(Task):
     def __init__(self, model_name, dataset_path, output_dir, provider):

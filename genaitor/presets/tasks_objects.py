@@ -6,10 +6,6 @@ from datasets import load_dataset
 from fastapi import FastAPI
 
 from genaitor.core import Task, TaskResult
-from genaitor.presets.providers import gemini_provider
-
-provider = gemini_provider()
-
 
 class QuestionAnsweringTask(Task):
     def __init__(self, description: str, goal: str, output_format: str, llm_provider):
