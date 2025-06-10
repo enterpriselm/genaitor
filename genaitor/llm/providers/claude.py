@@ -1,5 +1,5 @@
 import anthropic
-from ..base import LLMProvider, LLMConfig
+from genaitor.llm.base import LLMProvider, LLMConfig
 from typing import Optional, Iterator
 
 class ClaudeConfig(LLMConfig):

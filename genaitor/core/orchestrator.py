@@ -1,6 +1,6 @@
 from typing import Dict, List, Any, Optional
-from .base import TaskResult, AgentRole
-from .agent import Agent
+from genaitor.core.base import TaskResult, AgentRole
+from genaitor.core.agent import Agent
 from enum import Enum
 import asyncio
 from colorama import Style, init

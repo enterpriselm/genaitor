@@ -1,5 +1,5 @@
 import requests
-from ..base import LLMProvider, LLMConfig
+from genaitor.llm.base import LLMProvider, LLMConfig
 from typing import Optional, Dict, Any
 
 class OllamaConfig(LLMConfig):

@@ -5,8 +5,8 @@ init(autoreset=True)
 BLUE_PASTEL = "\033[38;2;173;216;230m"
 
 import google.generativeai as genai
-from ..base import LLMProvider, LLMConfig
-from ..key_manager import APIKeyManager
+from genaitor.llm.base import LLMProvider, LLMConfig
+from genaitor.llm.key_manager import APIKeyManager
 from typing import Optional, List, Iterator
 import logging
 import os

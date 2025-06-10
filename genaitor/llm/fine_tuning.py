@@ -1,4 +1,4 @@
-from genaitor.core import Task
+from genaito.core.base import Task
 import torch
 import json
 import os
