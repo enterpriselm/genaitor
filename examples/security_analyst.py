@@ -9,8 +9,6 @@ from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
 
-from genaitor.presets.agents import scraping_agent, analysis_agent, report_agent
-
 def scrape_security_content(url: str) -> str:
     """Scrapes security-related elements from a web page."""
     try:
@@ -36,7 +34,7 @@ def scrape_security_content(url: str) -> str:
     except Exception as e:
         return json.dumps({"error": str(e)})
 
-async def main():
+async def main(scraping_agent, analysis_agent, report_agent):
     print("\nInitializing Security Analysis System...")
 
     orchestrator = Orchestrator(
@@ -75,4 +73,10 @@ async def main():
         print(f"\nError: {str(e)}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    provider = create_gemini_provider(["GEMINII API KEY"])
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(
+        preset_agents["scraping_agent"],
+        preset_agents["analysis_agent"],
+        preset_agents["report_agent"]
+    )) 
