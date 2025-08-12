@@ -2,6 +2,9 @@ import asyncio
 import os
 
 from genaitor.core import Orchestrator, Flow, ExecutionMode
+from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.providers import create_gemini_provider
+
 from genaitor.presets.agents import equation_solver_agent, pinn_generation_agent, hyperparameter_optimization_agent, orchestrator_agent, validator_agent
 
 async def main():
