@@ -8,9 +8,7 @@ from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
 
-from genaitor.presets.agents import html_analysis_agent, scraper_generation_agent
-
-async def main():
+async def main(html_analysis_agent, scraper_generation_agent):
     print("\nInitializing Web Scraping System...")
     orchestrator = Orchestrator(
         agents={"html_analysis_agent": html_analysis_agent, 
@@ -44,4 +42,9 @@ async def main():
         print(f"\nError: {str(e)}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    provider = create_gemini_provider(["GEMINII API KEY"])
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(
+        preset_agents["html_analysis_agent"],
+        preset_agents["scraper_generation_agent"]
+    )) 
