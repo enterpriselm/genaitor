@@ -96,7 +96,7 @@ async def main(idea, dev_requirements_agent, backend_agent, frontend_agent, cicd
 
 if __name__ == "__main__":
     idea = input("Give an App idea.\n\n")
-    provider = create_gemini_provider("GEMINII API KEY")
+    provider = create_gemini_provider(["GEMINII API KEY"])
     preset_agents = create_preset_agents(provider)
     asyncio.run(main(idea, 
                      preset_agents["dev_requirements_agent"],
