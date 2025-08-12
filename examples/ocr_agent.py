@@ -11,8 +11,6 @@ from genaitor.core import (
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
 
-from genaitor.presets.agents import structure_data_agent
-
 import pandas as pd
 import json
 from core.base import OCRImageAgent
@@ -159,7 +157,7 @@ def unify_motor_columns(df):
 
     return df
 
-async def main():
+async def main(structure_data_agent):
     print("\nInitializing OCR Agents...")
     email_body, imgs_path = get_emails()
     print(f"[Email Body]\n{email_body}\n[Files attached]\n{len(imgs_path)}")
@@ -202,4 +200,6 @@ async def main():
         print(f"\nError: {str(e)}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    provider = create_gemini_provider(["GEMINII API KEY"])
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(preset_agents["structure_data_agent"])) 
