@@ -8,6 +8,8 @@ from genaitor.core import (
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
 from dotenv import load_dotenv
+import os
+load_dotenv()
 
 async def main(qa_agent):
     print("\nInitializing Advanced Usage Demo...")
