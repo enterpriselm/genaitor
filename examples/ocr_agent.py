@@ -1,6 +1,5 @@
 import email
 import imaplib
-import os
 
 import asyncio
 
@@ -203,6 +202,6 @@ async def main(structure_data_agent):
         print(f"\nError: {str(e)}")
 
 if __name__ == "__main__":
-    provider = create_gemini_provider(["GEMINII API KEY"])
+    provider = create_gemini_provider([os.getenv("GEMINI_API_KEY")])
     preset_agents = create_preset_agents(provider)
     asyncio.run(main(preset_agents["structure_data_agent"])) 
