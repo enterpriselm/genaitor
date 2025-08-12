@@ -47,7 +47,7 @@ def main():
     print(f"Extracted {len(image_band)} bands from the image.")
     
     print("Analyzing image...")
-    provider = create_gemini_provider(["GEMINII API KEY"])
+    provider = create_gemini_provider([os.getenv("GEMINI_API_KEY")])
     preset_agents = create_preset_agents(provider)
     result = asyncio.run(analyze_image(image_band, 
                                        preset_agents["disaster_analysis_agent"],
