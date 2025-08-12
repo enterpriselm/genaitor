@@ -42,6 +42,6 @@ async def main(data_understanding_agent, statistics_agent, anomalies_detection_a
         print(f"\nError: {str(e)}")
 
 if __name__ == "__main__":
-    provider = create_gemini_provider("GEMINII API KEY")
+    provider = create_gemini_provider(["GEMINII API KEY"])
     preset_agents = create_preset_agents(provider)
     asyncio.run(main(preset_agents["data_understanding_agent"], preset_agents["statistics_agent"], preset_agents["anomalies_detection_agent"], preset_agents["data_analysis_agent"])) 
