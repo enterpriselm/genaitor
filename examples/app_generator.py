@@ -3,9 +3,8 @@ import os
 
 import subprocess
 from genaitor.core import Orchestrator, Flow, ExecutionMode
-from genaitor.presets.agents import (
-    dev_requirements_agent, backend_agent, frontend_agent, cicd_agent
-)
+from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.providers import create_gemini_provider
 
 import re
 
@@ -50,7 +49,7 @@ def start_local_servers(base_path="generated_project"):
     subprocess.Popen(["npm", "install"], cwd=frontend_path, shell=True).wait()
     subprocess.Popen(["npm", "run", "dev"], cwd=frontend_path, shell=True)
 
-async def main(idea):
+async def main(idea, dev_requirements_agent, backend_agent, frontend_agent, cicd_agent):
     print("\n🤖 Agentic SaaS Builder Initializing...\n")
 
     agents = {
@@ -97,4 +96,12 @@ async def main(idea):
 
 if __name__ == "__main__":
     idea = input("Give an App idea.\n\n")
-    asyncio.run(main(idea))
+    provider = create_gemini_provider("GEMINII API KEY")
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(idea, 
+                     preset_agents["dev_requirements_agent"],
+                     preset_agents["backend_agent"],
+                     preset_agents["frontend_agent"],
+                     preset_agents["cicd_agent"]
+                    )) 
+
