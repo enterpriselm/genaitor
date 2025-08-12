@@ -4,9 +4,8 @@ import os
 from genaitor.core import (
     Orchestrator, Flow, ExecutionMode
 )
-from genaitor.presets.agents import qa_agent
     
-async def main():
+async def main(qa_agent):
     print("\nInitializing Advanced Usage Demo...")
     
     # Setup orchestrator
@@ -68,4 +67,6 @@ async def main():
             break
 
 if __name__ == "__main__":
+
     asyncio.run(main()) 
+
