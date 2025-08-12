@@ -7,9 +7,7 @@ from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
 
-from genaitor.presets.agents import research_agent, content_agent, optimization_agent, personalization_agent
-
-async def main():
+async def main(research_agent, content_agent, optimization_agent, personalization_agent):
     print("\n🚀 Initializing generating e-mail systems...")
 
     orchestrator = Orchestrator(
@@ -51,4 +49,11 @@ async def main():
         print(f"\n❌ Error: {str(e)}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    provider = create_gemini_provider(["GEMINII API KEY"])
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(
+        preset_agents["research_agent"],
+        preset_agents["content_agent"],
+        preset_agents["optimization_agent"],
+        preset_agents["personalization_agent"]
+    )) 
