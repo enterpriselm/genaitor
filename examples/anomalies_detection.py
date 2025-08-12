@@ -7,6 +7,9 @@ from genaitor.core import (
 )
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 async def main(data_understanding_agent, statistics_agent, anomalies_detection_agent, data_analysis_agent):
     print("\nInitializing Anomalies Detection System...")
