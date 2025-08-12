@@ -4,6 +4,9 @@ import asyncio
 from genaitor.core import (
     Orchestrator, Flow, ExecutionMode
 )
+from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.providers import create_gemini_provider
+
 from genaitor.presets.agents import problem_analysis_agent, numerical_analysis_agent, pinn_modeling_agent
 
 async def main():
