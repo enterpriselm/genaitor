@@ -6,11 +6,6 @@ from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
 
-from genaitor.presets.agents import (
-    disaster_analysis_agent, agro_analysis_agent, ecological_analysis_agent,
-    air_quality_analysis_agent, vegetation_analysis_agent, soil_moisture_analysis_agent
-)
-
 def extract_bands(img_path):
     """Extracts bands from a raster image."""
     image_band = {}
@@ -19,7 +14,7 @@ def extract_bands(img_path):
             image_band[i] = dataset.read(i)
     return image_band
 
-async def analyze_image(image_band):
+async def analyze_image(image_band, disaster_analysis_agent, agro_analysis_agent, ecological_analysis_agent, air_quality_analysis_agent, vegetation_analysis_agent, soil_moisture_analysis_agent):
     """Runs the analysis flow on the given image bands."""
     orchestrator = Orchestrator(
         agents={
@@ -50,7 +45,16 @@ def main():
     print(f"Extracted {len(image_band)} bands from the image.")
     
     print("Analyzing image...")
-    result = asyncio.run(analyze_image(image_band))
+    provider = create_gemini_provider(["GEMINII API KEY"])
+    preset_agents = create_preset_agents(provider)
+    result = asyncio.run(analyze_image(image_band, 
+                                       preset_agents["disaster_analysis_agent"],
+                                        preset_agents["agro_analysis_agent"],
+                                        preset_agents["ecological_analysis_agent"],
+                                        preset_agents["air_quality_analysis_agent"],
+                                        preset_agents["vegetation_analysis_agent"],
+                                        preset_agents["soil_moisture_analysis_agent"])) 
+                                    ))
     
     if result["success"]:
         for agent, response in result["content"].items():
