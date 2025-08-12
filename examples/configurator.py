@@ -1,6 +1,5 @@
 import pandas as pd
 import asyncio
-import os
 
 from genaitor.core import (
     Orchestrator, Flow, ExecutionMode
@@ -73,7 +72,7 @@ async def main(preferences_agent, payment_agent, proposal_agent, review_agent):
         print(f"\nError: {str(e)}")
 
 if __name__ == "__main__":
-    provider = create_gemini_provider(["GEMINII API KEY"])
+    provider = create_gemini_provider([os.getenv("GEMINI_API_KEY")])
     preset_agents = create_preset_agents(provider)
     asyncio.run(main(
         preset_agents["preferences_agent"], 
