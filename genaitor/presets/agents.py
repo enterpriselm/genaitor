@@ -2,9 +2,7 @@ from genaitor.core import Agent, AgentRole
 from genaitor.llm.base import LLMProvider
 from genaitor.presets.tasks import create_preset_tasks
 
-preset_tasks = create_preset_tasks()
-
-def create_preset_agents(llm_provider: LLMProvider):
+def create_preset_agents(llm_provider: LLMProvider, preset_tasks):
     if not isinstance(llm_provider, LLMProvider):
         raise TypeError("llm_provider must be an instance of LLMProvider.")
 
