@@ -5,9 +5,7 @@ from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
 
-from genaitor.presets.agents import equation_solver_agent, pinn_generation_agent, hyperparameter_optimization_agent, orchestrator_agent, validator_agent
-
-async def main():
+async def main(equation_solver_agent, pinn_generation_agent, hyperparameter_optimization_agent, orchestrator_agent, validator_agent):
     print("\nInitializing Multi-Agent System...")
 
     inputs = [
@@ -90,4 +88,14 @@ async def main():
             print("==" * 20)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    provider = create_gemini_provider(["GEMINII API KEY"])
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(
+        preset_agents["equation_solver_agent"], 
+        preset_agents["pinn_generation_agent"], 
+        preset_agents["hyperparameter_optimization_agent"], 
+        preset_agents["orchestrator_agent"], 
+        preset_agents["validator_agent"]
+    )) 
+    
+    
