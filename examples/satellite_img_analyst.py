@@ -1,6 +1,5 @@
 import asyncio
 import rasterio
-import os
 
 from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
