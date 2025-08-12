@@ -7,9 +7,8 @@ from genaitor.core import (
 
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
-from genaitor.presets.agents import autism_agent
 
-async def main():
+async def main(autism_agent):
     print("\nInitializing Autism Assistant...")
     
     orchestrator = Orchestrator(
@@ -46,4 +45,7 @@ async def main():
         print(f"\nError: {str(e)}")
         
 if __name__ == "__main__":
-    asyncio.run(main())
+    provider = create_gemini_provider("GEMINII API KEY")
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(preset_agents["autism_agent"])) 
+
