@@ -6,9 +6,7 @@ from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
 
-from genaitor.presets.agents import destination_selection_agent, budget_estimation_agent, itinerary_planning_agent
-
-async def main():
+async def main(destination_selection_agent, budget_estimation_agent, itinerary_planning_agent):
     print("\nInitializing Travel Planning System...")
     orchestrator = Orchestrator(
         agents={"destination_selection_agent": destination_selection_agent, 
@@ -44,4 +42,10 @@ async def main():
         print(f"\nError: {str(e)}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    provider = create_gemini_provider(["GEMINII API KEY"])
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(
+        preset_agents["destination_selection_agent"],
+        preset_agents["budget_estimation_agent"],
+        preset_agents["itinerary_planning_agent"])) 
+    
