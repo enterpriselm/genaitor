@@ -4,6 +4,9 @@ import asyncio
 from dotenv import load_dotenv
 
 from genaitor.core import Orchestrator, Flow, ExecutionMode
+from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.providers import create_gemini_provider
+
 from genaitor.presets.agents import research_agent, content_agent, optimization_agent, personalization_agent
 
 async def main():
