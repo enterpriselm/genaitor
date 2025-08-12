@@ -5,9 +5,10 @@ import os
 from genaitor.core import (
     Orchestrator, Flow, ExecutionMode
 )
-from genaitor.presets.agents import data_understanding_agent, statistics_agent, anomalies_detection_agent, data_analysis_agent
+from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.providers import create_gemini_provider
 
-async def main():
+async def main(data_understanding_agent, statistics_agent, anomalies_detection_agent, data_analysis_agent):
     print("\nInitializing Anomalies Detection System...")
     orchestrator = Orchestrator(
         agents={"data_understanding_agent": data_understanding_agent, 
@@ -41,4 +42,6 @@ async def main():
         print(f"\nError: {str(e)}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    provider = create_gemini_provider("GEMINII API KEY")
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(preset_agents["data_understanding_agent"], preset_agents["statistics_agent"], preset_agents["anomalies_detection_agent"], preset_agents["data_analysis_agent"])) 
