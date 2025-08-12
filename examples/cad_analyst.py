@@ -7,9 +7,7 @@ from genaitor.core import (
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
 
-from genaitor.presets.agents import problem_analysis_agent, numerical_analysis_agent, pinn_modeling_agent
-
-async def main():
+async def main(problem_analysis_agent, numerical_analysis_agent, pinn_modeling_agent):
     print("\nInitializing FEM/FVM/FEA Problem Solver System...")
     orchestrator = Orchestrator(
         agents={"problem_analysis_agent": problem_analysis_agent,
@@ -59,4 +57,11 @@ async def main():
         print(f"\nError: {str(e)}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    provider = create_gemini_provider("GEMINII API KEY")
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(
+        preset_agents["problem_analysis_agent"], 
+        preset_agents["numerical_analysis_agent"], 
+        preset_agents["pinn_modeling_agent"]
+    )) 
+    
