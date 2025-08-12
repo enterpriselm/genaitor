@@ -9,9 +9,7 @@ from typing import Dict, Any
 from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
-
-from genaitor.presets.agents import document_agent, question_agent, search_agent, response_agent
-
+    
 def extract_text_from_pdf(pdf_path: str) -> str:
     """Extracts text from a PDF file."""
     try:
@@ -34,7 +32,7 @@ def extract_text_from_ppt(ppt_path: str) -> str:
     except Exception as e:
         return str(e)
 
-async def main():
+async def main(document_agent, question_agent, search_agent, response_agent):
     print("\nInitializing Document QA System...")
 
     orchestrator = Orchestrator(
@@ -86,4 +84,11 @@ async def main():
         print(f"\nError: {str(e)}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    provider = create_gemini_provider(["GEMINII API KEY"])
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(
+        preset_agents["document_agent"], 
+        preset_agents["question_agent"], 
+        preset_agents["search_agent"], 
+        preset_agents["response_agent"]
+    )) 
