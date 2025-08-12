@@ -6,6 +6,9 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
 from genaitor.core import Orchestrator, Flow, ExecutionMode
+from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.providers import create_gemini_provider
+
 from genaitor.presets.agents import scraping_agent, analysis_agent, report_agent
 
 def scrape_security_content(url: str) -> str:
