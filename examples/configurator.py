@@ -8,9 +8,7 @@ from genaitor.core import (
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
 
-from genaitor.presets.agents import preferences_agent, payment_agent, proposal_agent, review_agent
-
-async def main():
+async def main(preferences_agent, payment_agent, proposal_agent, review_agent):
     print("\nInitializing Car Purchase System...")
     orchestrator = Orchestrator(
         agents={"preferences_agent": preferences_agent, 
@@ -72,4 +70,11 @@ async def main():
         print(f"\nError: {str(e)}")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    provider = create_gemini_provider("GEMINII API KEY")
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(
+        preset_agents["preferences_agent"], 
+        preset_agents["payment_agent"], 
+        preset_agents["proposal_agent"], 
+        preset_agents["review_agent"]
+    )) 
