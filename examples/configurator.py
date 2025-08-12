@@ -5,6 +5,9 @@ import os
 from genaitor.core import (
     Orchestrator, Flow, ExecutionMode
 )
+from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.providers import create_gemini_provider
+
 from genaitor.presets.agents import preferences_agent, payment_agent, proposal_agent, review_agent
 
 async def main():
