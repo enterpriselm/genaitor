@@ -43,7 +43,7 @@ async def main(destination_selection_agent, budget_estimation_agent, itinerary_p
         print(f"\nError: {str(e)}")
 
 if __name__ == "__main__":
-    provider = create_gemini_provider(["GEMINII API KEY"])
+    provider = create_gemini_provider([os.getenv("GEMINI_API_KEY")])
     preset_agents = create_preset_agents(provider)
     asyncio.run(main(
         preset_agents["destination_selection_agent"],
