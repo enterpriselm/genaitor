@@ -6,9 +6,7 @@ from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
 
-from genaitor.presets.agents import qa_agent, summarization_agent
-
-async def main():
+async def main(qa_agent, summarization_agent):
     print("\nInitializing Multi-Agent System...")
     orchestrator = Orchestrator(
         agents={"qa_agent": qa_agent, "summarization_agent": summarization_agent},
@@ -46,4 +44,6 @@ async def main():
             break
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    provider = create_gemini_provider(["GEMINII API KEY"])
+    preset_agents = create_preset_agents(provider)
+    asyncio.run(main(preset_agents["qa_agent"], preset_agents["summarization_agent"])) 
