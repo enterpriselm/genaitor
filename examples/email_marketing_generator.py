@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 async def main(research_agent, content_agent, optimization_agent, personalization_agent):
     print("\n🚀 Initializing generating e-mail systems...")
