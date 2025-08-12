@@ -1,7 +1,8 @@
 import pandas as pd
 import asyncio
+from dotenv import load_dotenv
 import os
-
+load_dotenv()
 from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
 from genaitor.presets.providers import create_gemini_provider
