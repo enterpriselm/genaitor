@@ -74,14 +74,15 @@ class QuestionAnsweringTask(Task):
         return self.llm.generate(prompt)
 
 # Configure the LLM provider
-llm_provider = GeminiProvider(GeminiConfig(api_key="your_api_key"))
+llm_provider = GeminiProvider(GeminiConfig(api_key="AIzaSyBDu-POvCmv4oIhqNEMvi5r_I0KSrLuOfU"))
 
 # Create an agent
-agent = Agent(name="QA Agent", task=QuestionAnsweringTask("Answering questions", "Provide accurate answers", "Text format", llm_provider))
+agent = Agent(role="QA Agent", tasks=[QuestionAnsweringTask("Answering questions", "Provide accurate answers", "Text format", llm_provider)])
 
 # Execute a task
-result = agent.task.execute("What is AI?")
-print(result)
+for task in agent.tasks:
+    result = task.execute("What is AI?")
+    print(result)
 ```
 
 ### Multi-Agent Example
