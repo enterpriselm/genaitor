@@ -54,8 +54,8 @@ To install the required dependencies, follow these steps:
 Here’s a simple example of how to create an agent that answers questions using a generative model:
 
 ```python
-from genaitor.genaitor.core import Agent, Task
-from genaitor.genaitor.llm import GeminiProvider, GeminiConfig
+from genaitor.core import Agent, Task
+from genaitor.llm import GeminiProvider, GeminiConfig
 
 # Define a custom task
 class QuestionAnsweringTask(Task):
