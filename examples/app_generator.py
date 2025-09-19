@@ -3,6 +3,7 @@ import asyncio
 import subprocess
 from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.tasks import create_preset_tasks
 from genaitor.presets.providers import create_gemini_provider
 from dotenv import load_dotenv
 import os
@@ -99,7 +100,8 @@ async def main(idea, dev_requirements_agent, backend_agent, frontend_agent, cicd
 if __name__ == "__main__":
     idea = input("Give an App idea.\n\n")
     provider = create_gemini_provider([os.getenv("GEMINI_API_KEY")])
-    preset_agents = create_preset_agents(provider)
+    tasks = create_preset_tasks(provider)
+    preset_agents = create_preset_agents(provider, tasks)
     asyncio.run(main(idea, 
                      preset_agents["dev_requirements_agent"],
                      preset_agents["backend_agent"],

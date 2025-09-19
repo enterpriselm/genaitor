@@ -5,6 +5,7 @@ from genaitor.core import (
 )
 
 from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.tasks import create_preset_tasks
 from genaitor.presets.providers import create_gemini_provider
 from dotenv import load_dotenv
 import os
@@ -72,7 +73,7 @@ async def main(qa_agent):
             break
 
 if __name__ == "__main__":
-    provider = create_gemini_provider([os.getenv("GEMINI_API_KEY")])
-    preset_agents = create_preset_agents(provider)
+    provider = create_gemini_provider(["AIzaSyBDu-POvCmv4oIhqNEMvi5r_I0KSrLuOfU"])
+    preset_tasks = create_preset_tasks(provider)
+    preset_agents = create_preset_agents(provider, preset_tasks)
     asyncio.run(main(preset_agents["qa_agent"])) 
-

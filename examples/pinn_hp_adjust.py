@@ -2,6 +2,7 @@ import asyncio
 
 from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.tasks import create_preset_tasks
 from genaitor.presets.providers import create_gemini_provider
 from dotenv import load_dotenv
 import os
@@ -62,5 +63,6 @@ async def main(pinn_tuning_agent):
 
 if __name__ == "__main__":
     provider = create_gemini_provider([os.getenv("GEMINI_API_KEY")])
-    preset_agents = create_preset_agents(provider)
+    tasks = create_preset_tasks(provider)
+    preset_agents = create_preset_agents(provider, tasks)
     asyncio.run(main(preset_agents["pinn_tuning_agent"])) 

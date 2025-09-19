@@ -5,6 +5,7 @@ from genaitor.core import (
     Orchestrator, Flow, ExecutionMode
 )
 from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.tasks import create_preset_tasks
 from genaitor.presets.providers import create_gemini_provider
 from dotenv import load_dotenv
 import os
@@ -45,5 +46,6 @@ async def main(data_understanding_agent, statistics_agent, anomalies_detection_a
 
 if __name__ == "__main__":
     provider = create_gemini_provider([os.getenv("GEMINI_API_KEY")])
-    preset_agents = create_preset_agents(provider)
+    tasks = create_preset_tasks(provider)
+    preset_agents = create_preset_agents(provider, tasks)
     asyncio.run(main(preset_agents["data_understanding_agent"], preset_agents["statistics_agent"], preset_agents["anomalies_detection_agent"], preset_agents["data_analysis_agent"])) 

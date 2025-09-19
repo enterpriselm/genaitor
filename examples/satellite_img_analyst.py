@@ -3,6 +3,7 @@ import rasterio
 
 from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.tasks import create_preset_tasks
 from genaitor.presets.providers import create_gemini_provider
 from dotenv import load_dotenv
 import os
@@ -48,7 +49,8 @@ def main():
     
     print("Analyzing image...")
     provider = create_gemini_provider([os.getenv("GEMINI_API_KEY")])
-    preset_agents = create_preset_agents(provider)
+    tasks = create_preset_tasks(provider)
+    preset_agents = create_preset_agents(provider, tasks)
     result = asyncio.run(analyze_image(image_band, 
                                        preset_agents["disaster_analysis_agent"],
                                         preset_agents["agro_analysis_agent"],
@@ -56,7 +58,6 @@ def main():
                                         preset_agents["air_quality_analysis_agent"],
                                         preset_agents["vegetation_analysis_agent"],
                                         preset_agents["soil_moisture_analysis_agent"])) 
-                                    ))
     
     if result["success"]:
         for agent, response in result["content"].items():

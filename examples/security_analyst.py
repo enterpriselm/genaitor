@@ -7,6 +7,7 @@ import os
 load_dotenv()
 from genaitor.core import Orchestrator, Flow, ExecutionMode
 from genaitor.presets.agents import create_preset_agents
+from genaitor.presets.tasks import create_preset_tasks
 from genaitor.presets.providers import create_gemini_provider
 
 def scrape_security_content(url: str) -> str:
@@ -74,7 +75,8 @@ async def main(scraping_agent, analysis_agent, report_agent):
 
 if __name__ == "__main__":
     provider = create_gemini_provider([os.getenv("GEMINI_API_KEY")])
-    preset_agents = create_preset_agents(provider)
+    tasks = create_preset_tasks(provider)
+    preset_agents = create_preset_agents(provider, tasks)
     asyncio.run(main(
         preset_agents["scraping_agent"],
         preset_agents["analysis_agent"],
