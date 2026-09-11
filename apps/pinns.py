@@ -1,8 +1,8 @@
 import streamlit as st
 import asyncio
 
-from genaitor.core import Orchestrator, Flow, ExecutionMode
-from genaitor.presets.agents import equation_solver_agent, pinn_generation_agent, hyperparameter_optimization_agent, orchestrator_agent, validator_agent
+from pinnaitor.core import Orchestrator, Flow, ExecutionMode
+from pinnaitor.presets.agents import equation_solver_agent, pinn_generation_agent, hyperparameter_optimization_agent, orchestrator_agent, validator_agent
 
 def run_orchestration(user_input, execution_mode):
     async def main():

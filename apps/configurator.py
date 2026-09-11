@@ -1,8 +1,8 @@
 import streamlit as st
 import asyncio
 
-from genaitor.core import Orchestrator, Flow, ExecutionMode
-from genaitor.presets.agents import preferences_agent, payment_agent, proposal_agent, review_agent
+from pinnaitor.core import Orchestrator, Flow, ExecutionMode
+from pinnaitor.presets.agents import preferences_agent, payment_agent, proposal_agent, review_agent
 
 def run_car_purchase(customer_preferences):
     async def main():

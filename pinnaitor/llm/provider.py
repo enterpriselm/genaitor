@@ -7,7 +7,7 @@ from absl import logging as absl_logging
 import time
 from tenacity import retry, stop_after_attempt, wait_exponential
 from functools import lru_cache
-from genaitor.llm.key_manager import APIKeyManager
+from pinnaitor.llm.key_manager import APIKeyManager
 
 absl_logging.set_verbosity(absl_logging.ERROR)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'

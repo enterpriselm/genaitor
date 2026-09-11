@@ -1,21 +1,31 @@
 <p align="center">
-  <img src="logo.png" alt="Genaitor Logo" width="300"/>
+  <img src="logo.png" alt="PinnAItor Logo" width="300"/>
 </p>
 
-# GenAItor
+# PinnAItor
 
 A platform for AI Agents and AI Agents products generation.
 
 ## Overview
 
-GenAItor is a cutting-edge platform designed to generate AI agents and related products that help automate complex tasks and processes. It leverages state-of-the-art machine learning libraries and tools to deliver flexible and scalable AI solutions.
+PinnAItor is a cutting-edge platform designed to generate AI agents and related products that help automate complex tasks and processes. It leverages state-of-the-art machine learning libraries and tools to deliver flexible and scalable AI solutions.
 
-To install the required dependencies, follow these steps:
+> PinnAItor was previously developed under the name `genaitor`. It has been renamed to establish its own independent identity on PyPI and GitHub.
+
+### Install from PyPI
+
+```bash
+pip install pinnaitor
+```
+
+### Install from source
+
+To install the required dependencies from a clone of this repository, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/enterpriselm/genaitor.git
-   cd genaitor
+   git clone https://github.com/PINNeAPPle-Labs/pinnaitor.git
+   cd pinnaitor
    ```
 
 2. Create a virtual environment (optional but recommended):
@@ -54,8 +64,8 @@ To install the required dependencies, follow these steps:
 Here’s a simple example of how to create an agent that answers questions using a generative model:
 
 ```python
-from genaitor.core import Agent, Task
-from genaitor.llm import GeminiProvider, GeminiConfig
+from pinnaitor.core import Agent, Task
+from pinnaitor.llm import GeminiProvider, GeminiConfig
 
 # Define a custom task
 class QuestionAnsweringTask(Task):
@@ -74,7 +84,7 @@ class QuestionAnsweringTask(Task):
         return self.llm.generate(prompt)
 
 # Configure the LLM provider
-llm_provider = GeminiProvider(GeminiConfig(api_key="AIzaSyBDu-POvCmv4oIhqNEMvi5r_I0KSrLuOfU"))
+llm_provider = GeminiProvider(GeminiConfig(api_key="your_api_key"))
 
 # Create an agent
 agent = Agent(role="QA Agent", tasks=[QuestionAnsweringTask("Answering questions", "Provide accurate answers", "Text format", llm_provider)])
@@ -91,11 +101,11 @@ Here’s a simple example of how to create a flow using multiple agents:
 
 ```python
 import asyncio
-from genaitor.core import (
+from pinnaitor.core import (
     Agent, Task, Orchestrator, Flow,
     ExecutionMode, AgentRole, TaskResult
 )
-from genaitor.llm import GeminiProvider, GeminiConfig
+from pinnaitor.llm import GeminiProvider, GeminiConfig
 
 # Define a base task (you could use different tasks for each agent)
 class LLMTask(Task):
@@ -178,20 +188,18 @@ Here is a simple guideline for running the examples
 ### Streamlit APPs
 
 ```bash
-
-streamlit run genaitor\apps\pinneaple.py
+streamlit run apps/pinneaple.py
 ```
 
 ### General examples
 
 ```bash
-
-python genaitor\examples\autism_assistant.py
+python examples/autism_assistant.py
 ```
 
 ## Demo Videos
 
-Here are some demo videos showcasing Genaitor in action:
+Here are some demo videos showcasing PinnAItor in action:
 
 - [Apps Generation](https://youtu.be/aJboXG3RvsA)
 - [OCR and Power Apps Automatization](https://youtu.be/VvIb7x3PJWQ)

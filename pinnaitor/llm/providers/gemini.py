@@ -5,13 +5,13 @@ init(autoreset=True)
 BLUE_PASTEL = "\033[38;2;173;216;230m"
 
 import google.generativeai as genai
-from genaitor.llm.base import LLMProvider, LLMConfig
-from genaitor.llm.key_manager import APIKeyManager
+from pinnaitor.llm.base import LLMProvider, LLMConfig
+from pinnaitor.llm.key_manager import APIKeyManager
 from typing import Optional, List, Iterator
 import logging
 import os
 import warnings
-from genaitor.utils.text_splitter import TextSplitter
+from pinnaitor.utils.text_splitter import TextSplitter
 import tiktoken
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'

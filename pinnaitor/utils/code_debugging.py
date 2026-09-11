@@ -2,8 +2,8 @@ import asyncio
 import os
 import subprocess
 
-from genaitor.core import Orchestrator, Flow, ExecutionMode
-from genaitor.presets.agents import debugging_agent
+from pinnaitor.core import Orchestrator, Flow, ExecutionMode
+from pinnaitor.presets.agents import debugging_agent
 
 
 class AutoDebuggingFlow:

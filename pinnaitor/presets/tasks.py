@@ -1,5 +1,5 @@
-from genaitor.presets.tasks_objects import *
-from genaitor.llm import LLMProvider
+from pinnaitor.presets.tasks_objects import *
+from pinnaitor.llm import LLMProvider
 
 def create_preset_tasks(llm_provider: LLMProvider):
     if not isinstance(llm_provider, LLMProvider):

@@ -1,12 +1,12 @@
 import pandas as pd
 import asyncio
 
-from genaitor.core import (
+from pinnaitor.core import (
     Orchestrator, Flow, ExecutionMode
 )
-from genaitor.presets.agents import create_preset_agents
-from genaitor.presets.tasks import create_preset_tasks
-from genaitor.presets.providers import create_gemini_provider
+from pinnaitor.presets.agents import create_preset_agents
+from pinnaitor.presets.tasks import create_preset_tasks
+from pinnaitor.presets.providers import create_gemini_provider
 from dotenv import load_dotenv
 import os
 load_dotenv()

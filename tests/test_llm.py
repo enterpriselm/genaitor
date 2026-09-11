@@ -1,5 +1,5 @@
 import unittest
-from .genaitor.llm.base import LLMProvider, LLMConfig
+from .pinnaitor.llm.base import LLMProvider, LLMConfig
 
 class MockLLMProvider(LLMProvider):
     def stream(self, *args, **kwargs):

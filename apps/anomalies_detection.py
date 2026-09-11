@@ -2,10 +2,10 @@ import streamlit as st
 import pandas as pd
 import asyncio
 
-from genaitor.core import (
+from pinnaitor.core import (
     Orchestrator, Flow, ExecutionMode
 )
-from genaitor.presets.agents import data_understanding_agent, statistics_agent, anomalies_detection_agent, data_analysis_agent
+from pinnaitor.presets.agents import data_understanding_agent, statistics_agent, anomalies_detection_agent, data_analysis_agent
 
 def process_file(file):
     df = pd.read_csv(file)

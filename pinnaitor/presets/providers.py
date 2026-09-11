@@ -1,6 +1,6 @@
 import os
-from genaitor.llm.providers.gemini import GeminiProvider, GeminiConfig
-from genaitor.llm.base import LLMProvider
+from pinnaitor.llm.providers.gemini import GeminiProvider, GeminiConfig
+from pinnaitor.llm.base import LLMProvider
 
 def create_gemini_provider(api_keys: list[str], temperature: float = 0.7, verbose: bool = False, max_tokens: int = 5000) -> GeminiProvider:
     gemini_config = GeminiConfig(

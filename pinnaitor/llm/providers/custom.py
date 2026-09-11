@@ -1,5 +1,5 @@
 import requests
-from genaitor.llm.base import LLMProvider, LLMConfig
+from pinnaitor.llm.base import LLMProvider, LLMConfig
 from typing import Optional, Dict, Any, Iterator
 
 class CustomServerConfig(LLMConfig):

@@ -6,8 +6,8 @@ import PyPDF2
 import pptx
 import sys
 
-from genaitor.core import Orchestrator, Flow, ExecutionMode
-from genaitor.presets.agents import document_agent, question_agent, search_agent, response_agent
+from pinnaitor.core import Orchestrator, Flow, ExecutionMode
+from pinnaitor.presets.agents import document_agent, question_agent, search_agent, response_agent
 
 def extract_text_from_pdf(pdf_file):
     """Extracts text from a PDF file."""

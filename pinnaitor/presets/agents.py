@@ -1,6 +1,6 @@
-from genaitor.core import Agent, AgentRole
-from genaitor.llm.base import LLMProvider
-from genaitor.presets.tasks import create_preset_tasks
+from pinnaitor.core import Agent, AgentRole
+from pinnaitor.llm.base import LLMProvider
+from pinnaitor.presets.tasks import create_preset_tasks
 
 def create_preset_agents(llm_provider: LLMProvider, preset_tasks):
     if not isinstance(llm_provider, LLMProvider):

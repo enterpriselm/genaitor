@@ -1,8 +1,8 @@
 import asyncio
 import unittest
-from .genaitor.core.orchestrator import Orchestrator, Flow
-from .genaitor.core.agent import Agent
-from .genaitor.core.base import TaskResult
+from .pinnaitor.core.orchestrator import Orchestrator, Flow
+from .pinnaitor.core.agent import Agent
+from .pinnaitor.core.base import TaskResult
 
 class MockAgent(Agent):
     async def process_request(self, request, context):

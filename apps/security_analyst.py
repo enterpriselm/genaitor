@@ -6,8 +6,8 @@ import json
 import os
 import sys
 
-from genaitor.core import Orchestrator, Flow, ExecutionMode
-from genaitor.presets.agents import scraping_agent, analysis_agent, report_agent
+from pinnaitor.core import Orchestrator, Flow, ExecutionMode
+from pinnaitor.presets.agents import scraping_agent, analysis_agent, report_agent
 
 async def async_scrape_security_content(url: str) -> str:
     """Scrapes security-related elements from a web page asynchronously."""

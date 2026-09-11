@@ -1,13 +1,13 @@
 import streamlit as st
 import subprocess
 
-st.set_page_config(page_title="Genaitor", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="PinnAItor", page_icon="🤖", layout="centered")
 
 st.image("apps/assets/logo.png", width=150)
-st.title("Genaitor Examples")
+st.title("PinnAItor Examples")
 st.write(
-    "Genaitor is an innovative platform for creating AI agents and machine learning-based solutions. "
-    "Explore the applications below to see examples of Genaitor's capabilities."
+    "PinnAItor is an innovative platform for creating AI agents and machine learning-based solutions. "
+    "Explore the applications below to see examples of PinnAItor's capabilities."
 )
 
 apps = {

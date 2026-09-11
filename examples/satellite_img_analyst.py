@@ -1,10 +1,10 @@
 import asyncio
 import rasterio
 
-from genaitor.core import Orchestrator, Flow, ExecutionMode
-from genaitor.presets.agents import create_preset_agents
-from genaitor.presets.tasks import create_preset_tasks
-from genaitor.presets.providers import create_gemini_provider
+from pinnaitor.core import Orchestrator, Flow, ExecutionMode
+from pinnaitor.presets.agents import create_preset_agents
+from pinnaitor.presets.tasks import create_preset_tasks
+from pinnaitor.presets.providers import create_gemini_provider
 from dotenv import load_dotenv
 import os
 load_dotenv()
@@ -44,7 +44,7 @@ async def analyze_image(image_band, disaster_analysis_agent, agro_analysis_agent
         return {"success": False, "error": str(e)}
 
 def main():
-    image_band = extract_bands('genaitor\examples\files\S5P_OFFL_L1B_IR_UVN_20250423T033001_20250423T051131_38998_03_020101_20250423T065508.nc')
+    image_band = extract_bands('pinnaitor\examples\files\S5P_OFFL_L1B_IR_UVN_20250423T033001_20250423T051131_38998_03_020101_20250423T065508.nc')
     print(f"Extracted {len(image_band)} bands from the image.")
     
     print("Analyzing image...")

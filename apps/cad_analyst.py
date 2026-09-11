@@ -1,10 +1,10 @@
 import streamlit as st
 import asyncio
 
-from genaitor.core import (
+from pinnaitor.core import (
     Orchestrator, Flow, ExecutionMode
 )
-from genaitor.presets.agents import problem_analysis_agent, numerical_analysis_agent, pinn_modeling_agent
+from pinnaitor.presets.agents import problem_analysis_agent, numerical_analysis_agent, pinn_modeling_agent
 
 async def process_problem(user_requirements, problem_description):
     orchestrator = Orchestrator(

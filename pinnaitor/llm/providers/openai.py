@@ -1,5 +1,5 @@
 import openai
-from genaitor.llm.base import LLMProvider, LLMConfig
+from pinnaitor.llm.base import LLMProvider, LLMConfig
 from typing import Optional, List, Iterator
 
 class OpenAIConfig(LLMConfig):

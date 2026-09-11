@@ -3,11 +3,14 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "genaitor"
-# PyPI already has 1.0.1 (published ahead of this repo's prior 0.1.1); this
-# repo has no tag past v1.0.0, so 1.0.2 is the smallest bump that is newer
-# than what PyPI has already seen.
-version = "1.0.2"
+name = "pinnaitor"
+# This project was previously published/developed under the name "genaitor",
+# but that name on PyPI is owned by a different, unrelated account/org
+# (a 403 confirmed this session that we cannot upload to it). Rather than
+# fight over the old name, the project has been renamed to "pinnaitor"
+# (brand: PinnAItor) as a fresh identity, so the version resets to 0.1.0
+# rather than continuing the old genaitor 1.0.x lineage.
+version = "0.1.0"
 description = "A platform for AI Agents and AI Agents products generation."
 authors = [{ name = "Yan Barros", email = "yanbarrosyan@gmail.com" }]
 readme = "README.md"
@@ -75,22 +78,19 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/PINNeAPPle-Labs/genaitor"
-Repository = "https://github.com/PINNeAPPle-Labs/genaitor"
-Issues = "https://github.com/PINNeAPPle-Labs/genaitor/issues"
+Homepage = "https://github.com/PINNeAPPle-Labs/pinnaitor"
+Repository = "https://github.com/PINNeAPPle-Labs/pinnaitor"
+Issues = "https://github.com/PINNeAPPle-Labs/pinnaitor/issues"
 
 [tool.setuptools]
 package-dir = { "" = "." }
 
 [tool.setuptools.packages.find]
-# NOTE: this previously read `where = ["genaitor"]`, which tells setuptools
-# to look for packages *inside* the genaitor/ directory and name them
-# relative to it -- so it discovered "core", "llm", "presets", "utils" as
-# top-level packages and never included a "genaitor" package at all.
-# A real build+wheel-inspect confirmed this: `import genaitor` would fail
-# for anyone who installed the package as configured. `where = ["."]` +
-# `include = ["genaitor*"]` discovers "genaitor" itself (and its
-# genaitor.core / genaitor.llm / genaitor.presets / genaitor.utils
-# submodules) as the actual package tree.
+# `where = ["."]` + `include = ["pinnaitor*"]` discovers "pinnaitor" itself
+# (and its pinnaitor.core / pinnaitor.llm / pinnaitor.presets /
+# pinnaitor.utils submodules) as the actual package tree. (A prior config
+# that read `where = ["genaitor"]` looked *inside* that directory instead
+# and never included the top-level package at all -- fixed earlier this
+# session, and carried forward correctly here under the new name.)
 where = ["."]
-include = ["genaitor*"]
+include = ["pinnaitor*"]

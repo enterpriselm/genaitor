@@ -26,13 +26,13 @@ import avro.schema
 import trimesh
 import open3d as o3d
 
-from genaitor.core import (
+from pinnaitor.core import (
     Agent, Task, Orchestrator, TaskResult,
     ExecutionMode, AgentRole, Flow
 )
-from genaitor.llm import GeminiProvider, GeminiConfig
+from pinnaitor.llm import GeminiProvider, GeminiConfig
 from dotenv import load_dotenv
-load_dotenv(r'genaitor\.env')
+load_dotenv(r'pinnaitor\.env')
 
 api_keys = [os.getenv('API_KEY')]
 

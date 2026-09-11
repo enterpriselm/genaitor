@@ -5,10 +5,10 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import os
 load_dotenv()
-from genaitor.core import Orchestrator, Flow, ExecutionMode
-from genaitor.presets.agents import create_preset_agents
-from genaitor.presets.tasks import create_preset_tasks
-from genaitor.presets.providers import create_gemini_provider
+from pinnaitor.core import Orchestrator, Flow, ExecutionMode
+from pinnaitor.presets.agents import create_preset_agents
+from pinnaitor.presets.tasks import create_preset_tasks
+from pinnaitor.presets.providers import create_gemini_provider
 
 def scrape_security_content(url: str) -> str:
     """Scrapes security-related elements from a web page."""

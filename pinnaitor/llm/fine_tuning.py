@@ -1,4 +1,4 @@
-from genaitor.core.base import Task
+from pinnaitor.core.base import Task
 import torch
 import json
 import os

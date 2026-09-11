@@ -1,8 +1,8 @@
 import streamlit as st
 import asyncio
 
-from genaitor.core import Orchestrator, Flow, ExecutionMode
-from genaitor.presets.agents import research_agent, content_agent, optimization_agent, personalization_agent
+from pinnaitor.core import Orchestrator, Flow, ExecutionMode
+from pinnaitor.presets.agents import research_agent, content_agent, optimization_agent, personalization_agent
 
 
 def setup_orchestrator():

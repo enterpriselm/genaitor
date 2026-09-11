@@ -1,8 +1,8 @@
 import streamlit as st
 import asyncio
 
-from genaitor.core import Orchestrator, Flow, ExecutionMode
-from genaitor.presets.agents import autism_agent
+from pinnaitor.core import Orchestrator, Flow, ExecutionMode
+from pinnaitor.presets.agents import autism_agent
 
 def process_request(hyperfocus, question):
     input_data = f"Hyperfocus: {hyperfocus}\nQuestion: {question}"
